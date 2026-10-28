@@ -156,8 +156,10 @@ def fetch_lodes(st: str) -> None:
             continue
         url = LODES_URL.format(st=a, kind=kind, part=part, year=year)
         log.info("LODES %s", url)
+        raw = out.with_suffix(".download")
+        _fetch_file(url, raw)
         parts = []
-        for chunk in pd.read_csv(url, dtype={k: str for k in keys}, chunksize=1_000_000):
+        for chunk in pd.read_csv(raw, dtype={k: str for k in keys}, chunksize=1_000_000, compression="gzip"):
             chunk = chunk.drop(columns=["createdate"], errors="ignore")
             for k in keys:
                 chunk[k] = chunk[k].str[:12]
@@ -168,6 +170,28 @@ def fetch_lodes(st: str) -> None:
         tmp = out.with_suffix(".tmp")
         agg.to_csv(tmp, index=False, compression="gzip")
         tmp.rename(out)
+        raw.unlink()
+
+
+def _fetch_file(url: str, dest: Path, tries: int = 3) -> None:
+    """Download to a local file, retrying dropped connections (LEHD files run to hundreds of MB)."""
+    import time
+
+    import requests
+
+    for attempt in range(tries):
+        try:
+            with requests.get(url, stream=True, timeout=300) as r:
+                r.raise_for_status()
+                with open(dest, "wb") as f:
+                    for block in r.iter_content(1 << 20):
+                        f.write(block)
+            return
+        except (requests.RequestException, OSError) as e:
+            log.warning("download of %s failed (%s); attempt %d of %d", url, e, attempt + 1, tries)
+            if attempt == tries - 1:
+                raise
+            time.sleep(10 * (attempt + 1))
 
 
 # ------------------------------------------------------------- working dir
