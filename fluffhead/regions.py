@@ -224,3 +224,13 @@ def coverage(counties: pd.DataFrame | None = None) -> pd.DataFrame:
     tot = counties.groupby("state")["pop"].sum()
     sim = counties[counties.group != ""].groupby("state")["pop"].sum().reindex(tot.index).fillna(0)
     return pd.DataFrame({"pop": tot, "simulated": sim.astype(int), "coverage": sim / tot})
+
+
+def anchor_groups() -> list[str]:
+    """Each state's largest simulated group (by in-state population), plus groups scaled states depend on.
+
+    Built first, these give every jurisdiction a forecast as early as possible.
+    """
+    c = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str, "state": str}, keep_default_na=False)
+    s = c[c.group != ""].groupby(["state", "group"])["pop"].sum().reset_index()
+    return sorted(set(s.loc[s.groupby("state")["pop"].idxmax(), "group"]) | set(C.SCALED_STATES.values()))

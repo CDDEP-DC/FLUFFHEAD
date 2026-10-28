@@ -53,9 +53,15 @@ def cmd_fetch(args) -> int:
 
 
 def cmd_networks(args) -> int:
-    """Build groups smallest first; with --wait, groups whose states aren't downloaded yet are retried."""
+    """Build anchor groups (every state's largest) first, then the rest, smallest first within each.
+
+    With --wait, groups whose states aren't downloaded yet are retried.
+    """
     from . import greasypop as G
-    groups = pd.read_csv(C.REGIONS_DIR / "groups.csv").sort_values("pop")
+    from .regions import anchor_groups
+    groups = pd.read_csv(C.REGIONS_DIR / "groups.csv")
+    anchors = set(anchor_groups())
+    groups = groups.assign(anchor=~groups.group.isin(anchors)).sort_values(["anchor", "pop"])
     todo = [g for g in (args.groups or groups.group)
             if not (C.REGIONS_DIR / g / "network" / "network.npz").exists() or args.force]
     failed = []
