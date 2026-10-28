@@ -1,0 +1,21 @@
+# environments and caches
+.venv/
+__pycache__/
+*.egg-info/
+.DS_Store
+cache/
+logs/
+
+# raw downloads (rebuild with `fluffhead fetch`)
+data/raw/
+
+# GREASYPOP working copies and generated networks (large; rebuild with `fluffhead networks`)
+work/
+data/regions/*/network/
+
+# simulation outputs: keep summaries only
+runs/*/*
+!runs/*/summary/
+
+.env
+.venv-greasypop/

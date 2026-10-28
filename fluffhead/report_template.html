@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLUFFHEAD Forecast Review</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --s-forecast: #1c5cab; --band-95: #cde2fb; --band-50: #86b6ef;
+  --s-nowcast: #eb6834; --s-observed: #0b0b0b; --s-previous: #898781;
+  --div-neg-2: #2a78d6; --div-neg-1: #86b6ef; --div-mid: #c3c2b7; --div-pos-1: #ef9a9a; --div-pos-2: #e34948;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --s-forecast: #9ec5f4; --band-95: #0d366b; --band-50: #1c5cab;
+    --s-nowcast: #d95926; --s-observed: #f0efec; --s-previous: #898781;
+    --div-neg-2: #3987e5; --div-neg-1: #1c5cab; --div-mid: #383835; --div-pos-1: #9e3a3a; --div-pos-2: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --s-forecast: #9ec5f4; --band-95: #0d366b; --band-50: #1c5cab;
+  --s-nowcast: #d95926; --s-observed: #f0efec; --s-previous: #898781;
+  --div-neg-2: #3987e5; --div-neg-1: #1c5cab; --div-mid: #383835; --div-pos-1: #9e3a3a; --div-pos-2: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { padding: 20px 24px 8px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; }
+h1 { font-size: 20px; margin: 0; }
+h2 { font-size: 16px; margin: 0 0 10px; }
+.sub { color: var(--ink-2); }
+nav { position: sticky; top: 0; z-index: 5; background: var(--page); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; }
+nav button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--ink-2); padding: 10px 12px; font: inherit; cursor: pointer; white-space: nowrap; }
+nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+main { padding: 16px 24px 40px; max-width: 1280px; }
+section[hidden] { display: none; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.tile .v { font-size: 22px; font-weight: 600; }
+.tile .k { color: var(--ink-2); font-size: 12px; }
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); align-items: flex-start; }
+.checks li:first-child { border-top: 0; }
+.badge { flex: none; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; padding: 2px 7px; border-radius: 4px; color: #fff; }
+.badge.error { background: var(--critical); } .badge.warning { background: var(--warning); color: #0b0b0b; } .badge.info { background: var(--muted); }
+.badge.ok { background: var(--good); }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+select, input[type=search] { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--axis); background: var(--surface); color: var(--ink); }
+.grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } main, header, nav { padding-left: 16px; padding-right: 16px; } }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--ink-2); margin: 6px 0 2px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
+.sw.line { height: 2px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; display: none; z-index: 3; }
+.tip b { font-variant-numeric: tabular-nums; }
+.tip .t { color: var(--ink-2); margin-bottom: 4px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; font-size: 12px; cursor: pointer; position: sticky; top: 41px; background: var(--surface); }
+tbody tr:hover { background: color-mix(in srgb, var(--s-forecast) 8%, transparent); }
+.tablewrap { overflow-x: auto; }
+.scroll { max-height: 360px; overflow-y: auto; }
+.scroll th { top: 0; }
+.multiples { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.multiples .card { padding: 10px; margin: 0; cursor: pointer; }
+.multiples .name { font-size: 12px; font-weight: 600; margin-bottom: 2px; display: flex; justify-content: space-between; }
+.multiples .name span { color: var(--muted); font-weight: 400; }
+details summary { cursor: pointer; color: var(--ink-2); font-size: 12px; margin-top: 8px; }
+.note { color: var(--ink-2); font-size: 13px; max-width: 75ch; }
+.note p { margin: 0 0 10px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+.kv div:nth-child(odd) { color: var(--ink-2); }
+button.theme { margin-left: auto; font: inherit; font-size: 12px; background: none; border: 1px solid var(--axis); color: var(--ink-2); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <h1>FLUFFHEAD forecast review</h1>
+  <div class="sub" id="meta"></div>
+  <button class="theme" id="theme" type="button">Theme</button>
+</header>
+<nav role="tablist" id="tabs"></nav>
+<main>
+  <section id="tab-overview">
+    <div class="tiles" id="tiles"></div>
+    <div class="card"><h2>Checks before submitting</h2><ul class="checks" id="checks"></ul></div>
+    <div class="card"><h2>United States</h2><div id="us-chart"></div></div>
+  </section>
+  <section id="tab-locations" hidden>
+    <div class="row"><label for="loc">Location</label><select id="loc"></select><span class="sub" id="loc-note"></span></div>
+    <div class="grid2">
+      <div class="card"><h2 id="loc-title"></h2><div id="loc-chart"></div><details><summary>Show as table</summary><div class="tablewrap" id="loc-table"></div></details></div>
+      <div>
+        <div class="card"><h2>Rate change</h2><div id="loc-rate"></div></div>
+        <div class="card"><h2>Peak week</h2><div id="loc-peak"></div><div class="kv" id="loc-peaksize"></div></div>
+      </div>
+    </div>
+  </section>
+  <section id="tab-multiples" hidden>
+    <p class="note">Every location, same layout as the explorer: reported data, nowcast and the forecast's 50% and 95% bands to the end of the season. Each panel has its own y-scale. Click a panel to open it.</p>
+    <div class="multiples" id="multiples"></div>
+  </section>
+  <section id="tab-regions" hidden>
+    <div class="card"><h2>Simulation groups</h2>
+      <div class="row"><input type="search" id="reg-filter" placeholder="Filter regions" aria-label="Filter regions"><span class="sub">Click a region to see its fit.</span></div>
+      <div class="tablewrap scroll" id="reg-table"></div></div>
+    <div class="grid2">
+      <div class="card"><h2 id="reg-title">Region fit</h2><p class="note" id="reg-note"></p><div id="reg-chart"></div></div>
+      <div class="card"><h2>Fitted parameters</h2><p class="note">Weighted 5th / 50th / 95th percentiles over the prior draws.</p><div class="kv" id="reg-params"></div></div>
+    </div>
+  </section>
+  <section id="tab-table" hidden>
+    <div class="card"><h2>Median forecasts</h2><div class="tablewrap" id="summary"></div></div>
+  </section>
+  <section id="tab-method" hidden>
+    <div class="card note">
+      <h2>How this forecast is made</h2>
+      <p><b>Population and contacts.</b> Each simulated region is a CSA or stand-alone metro area (small, strongly commuting-linked ones merged). GREASYPOP-CO builds its synthetic population from the 2015–19 ACS, PUMS, LODES and NCES school data: households, schools, workplaces and group quarters. Contacts within households are complete; workplaces and schools are stochastic block models (by income category and grade); group quarters are small-world graphs; community encounters are drawn from the residents and workers of a census tract.</p>
+      <p><b>Transmission.</b> Event-driven: when an agent is infected their whole course is drawn (latent, presymptomatic, symptomatic or asymptomatic, possible admission), and each contact gets candidate transmission events at the layer's rate. Weekends, school calendars and a winter seasonality factor thin those events; so do prior immunity and vaccination (CDC NIS-Flu coverage by state, age and month, 2025–26 standing in until 2026–27 data exist).</p>
+      <p><b>Fitting.</b> Each region is fitted to its share of its states' weekly admissions (by population; the last two weeks nowcast for backfill with flusight-fm's revision model). Transmissibility, prior immunity, importation and seasonality are drawn from priors and weighted by a negative binomial likelihood; a per-state admission multiplier is estimated in closed form. Kept draws are continued to the end of the season several times each.</p>
+      <p><b>From regions to states.</b> A state's forecast is the sum of its simulated parts divided by the share of the state they cover: the rest of the state is assumed to share their per-capita rate. Puerto Rico follows Miami's per-capita curve, levelled to its own recent reports. Regions are tied together by a Gaussian copula on their season totals, so the national total keeps realistic spread. US = sum of the jurisdictions.</p>
+      <p><b>Known limits.</b> Importation pressure after the data cutoff is held at its last level. Disease parameters are literature priors, not estimated here beyond the four fitted ones. GREASYPOP uses 2019 boundaries and populations, rescaled to current hub populations.</p>
+    </div>
+  </section>
+</main>
+<script type="application/json" id="report-data">__DATA__</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("report-data").textContent);
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, text) => { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+const SVG = "http://www.w3.org/2000/svg";
+const sv = (tag, attrs = {}) => { const e = document.createElementNS(SVG, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+const fmt = (v) => v == null ? "–" : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : (+v).toFixed(v < 10 ? 1 : 0));
+const fmtDate = (s) => { const d = new Date(s + "T00:00:00"); return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }); };
+const weeks = D.weeks;
+const byLoc = Object.fromEntries(D.locations.map(l => [l.location, l]));
+
+// ---------------------------------------------------------------- theme
+$("#theme").addEventListener("click", () => {
+  const r = document.documentElement, dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = r.dataset.theme || (dark ? "dark" : "light");
+  r.dataset.theme = cur === "dark" ? "light" : "dark";
+  renderAll();
+});
+
+// ---------------------------------------------------------------- tabs
+const TABS = [["overview", "Overview"], ["locations", "Locations"], ["multiples", "Small multiples"], ["regions", "Regions"], ["table", "Table"], ["method", "Method"]];
+for (const [id, label] of TABS) {
+  const b = el("button", { role: "tab", "aria-selected": id === "overview" ? "true" : "false", "data-tab": id }, label);
+  b.addEventListener("click", () => showTab(id));
+  $("#tabs").append(b);
+}
+function showTab(id) {
+  if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+  for (const [t] of TABS) { $("#tab-" + t).hidden = t !== id; }
+  for (const b of document.querySelectorAll("nav button")) b.setAttribute("aria-selected", b.dataset.tab === id ? "true" : "false");
+  renderAll();
+}
+
+// ---------------------------------------------------------------- fan chart
+// series: observed (ink), nowcast (orange), forecast median + 50/95% bands (blue), last week's median (muted dashed)
+function fanChart(host, loc, { height = 300, mini = false, from = null } = {}) {
+  host.innerHTML = "";
+  const L = byLoc[loc];
+  const W = mini ? 220 : 760, H = mini ? 110 : height;
+  const m = mini ? { t: 4, r: 4, b: 14, l: 4 } : { t: 12, r: 16, b: 28, l: 52 };
+  const i0 = from ? Math.max(0, weeks.indexOf(from)) : 0;
+  const idx = weeks.map((_, i) => i).filter(i => i >= i0);
+  const obs = L.observed, b = L.bands;
+  const now = Object.fromEntries((L.nowcast || []).map(n => [n.date, n]));
+  const prevPts = Object.entries(L.previous || {}).map(([h, v]) => [addWeeks(D.ref_date, +h), v]).filter(([d]) => weeks.includes(d));
+  let ymax = 1;
+  for (const i of idx) { ymax = Math.max(ymax, obs[i] || 0, b["0.975"][i] || 0); }
+  for (const n of Object.values(now)) ymax = Math.max(ymax, n.reported || 0, n.median || 0);
+  ymax = niceMax(ymax * 1.05);
+  const x = (i) => m.l + (i - i0) / Math.max(1, weeks.length - 1 - i0) * (W - m.l - m.r);
+  const y = (v) => H - m.b - v / ymax * (H - m.t - m.b);
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${L.name}: weekly admissions, reported and forecast` });
+  // grid + axes
+  if (!mini) {
+    for (const t of ticks(ymax)) {
+      svg.append(sv("line", { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), stroke: "var(--grid)", "stroke-width": 1 }));
+      const tx = sv("text", { x: m.l - 8, y: y(t) + 4, "text-anchor": "end", "font-size": 12, fill: "var(--muted)", "font-variant-numeric": "tabular-nums" }); tx.textContent = fmt(t); svg.append(tx);
+    }
+    let lastMonth = -1;
+    idx.forEach(i => { const d = new Date(weeks[i] + "T00:00:00"); if (d.getMonth() !== lastMonth && d.getDate() <= 7) { lastMonth = d.getMonth();
+      const tx = sv("text", { x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 12, fill: "var(--muted)" }); tx.textContent = d.toLocaleDateString(undefined, { month: "short" }); svg.append(tx); } });
+  }
+  svg.append(sv("line", { x1: m.l, x2: W - m.r, y1: y(0), y2: y(0), stroke: "var(--axis)", "stroke-width": 1 }));
+  // data cutoff
+  const ci = weeks.indexOf(D.last_obs);
+  if (ci >= i0) svg.append(sv("line", { x1: x(ci), x2: x(ci), y1: m.t, y2: H - m.b, stroke: "var(--axis)", "stroke-dasharray": "3 3" }));
+  // bands
+  const area = (lo, hi, fill) => {
+    const pts = idx.filter(i => b[lo][i] != null);
+    if (!pts.length) return;
+    const d = pts.map((i, k) => `${k ? "L" : "M"}${x(i)},${y(b[hi][i])}`).join("") + pts.slice().reverse().map(i => `L${x(i)},${y(b[lo][i])}`).join("") + "Z";
+    svg.append(sv("path", { d, fill }));
+  };
+  area("0.025", "0.975", "var(--band-95)");
+  area("0.25", "0.75", "var(--band-50)");
+  const line = (vals, stroke, extra = {}) => {
+    let d = "", pen = false;
+    for (const i of idx) { const v = vals(i); if (v == null) { pen = false; continue; } d += `${pen ? "L" : "M"}${x(i)},${y(v)}`; pen = true; }
+    if (d) svg.append(sv("path", { d, fill: "none", stroke, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round", ...extra }));
+  };
+  line(i => b["0.5"][i], "var(--s-forecast)");
+  line(i => obs[i], "var(--s-observed)");
+  if (!mini && prevPts.length) {
+    const d = prevPts.map(([dt, v], k) => `${k ? "L" : "M"}${x(weeks.indexOf(dt))},${y(v)}`).join("");
+    svg.append(sv("path", { d, fill: "none", stroke: "var(--s-previous)", "stroke-width": 2, "stroke-dasharray": "5 4" }));
+  }
+  for (const n of Object.values(now)) {
+    const i = weeks.indexOf(n.date); if (i < i0) continue;
+    if (n.reported != null && !mini) svg.append(sv("circle", { cx: x(i), cy: y(n.reported), r: 4, fill: "var(--surface)", stroke: "var(--s-observed)", "stroke-width": 2 }));
+    if (n.median != null) svg.append(sv("circle", { cx: x(i), cy: y(n.median), r: mini ? 2.5 : 4.5, fill: "var(--s-nowcast)", stroke: "var(--surface)", "stroke-width": 2 }));
+  }
+  const wrap = el("div", { class: "chart" });
+  wrap.append(svg);
+  if (!mini) {
+    const tip = el("div", { class: "tip" }); wrap.append(tip);
+    const cross = sv("line", { y1: m.t, y2: H - m.b, stroke: "var(--axis)", "stroke-width": 1, visibility: "hidden" }); svg.append(cross);
+    const hit = sv("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }); svg.append(hit);
+    const move = (ev) => {
+      const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+      let i = Math.round((px - m.l) / (W - m.l - m.r) * (weeks.length - 1 - i0)) + i0;
+      i = Math.max(i0, Math.min(weeks.length - 1, i));
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+      tip.replaceChildren(el("div", { class: "t" }, "Week ending " + fmtDate(weeks[i])));
+      const add = (label, v) => { if (v == null) return; const r2 = el("div"); r2.append(el("b", {}, fmt(v)), document.createTextNode(" " + label)); tip.append(r2); };
+      add("reported (revised)", obs[i]);
+      if (now[weeks[i]]) { add("as reported", now[weeks[i]].reported); add("nowcast", now[weeks[i]].median); }
+      add("forecast median", b["0.5"][i]);
+      if (b["0.025"][i] != null) add(`95% range ${fmt(b["0.025"][i])}–`, b["0.975"][i]);
+      const pv = prevPts.find(([d]) => d === weeks[i]); if (pv) add("last week's median", pv[1]);
+      tip.style.display = "block";
+      const left = (x(i) / W) * r.width;
+      tip.style.left = Math.min(left + 12, r.width - tip.offsetWidth - 4) + "px"; tip.style.top = "8px";
+    };
+    hit.addEventListener("pointermove", move);
+    hit.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); });
+    const lg = el("div", { class: "legend" });
+    const item = (cls, style, label) => { const s = el("span"); const w = el("i", { class: "sw " + cls, style }); s.append(w, document.createTextNode(label)); lg.append(s); };
+    item("line", "background: var(--s-observed)", "Reported");
+    item("", "background: var(--s-nowcast); border-radius: 50%; width: 9px; height: 9px", "Nowcast");
+    item("line", "background: var(--s-forecast)", "Forecast median");
+    item("", "background: var(--band-50)", "50%");
+    item("", "background: var(--band-95)", "95%");
+    if (prevPts.length) item("line", "background: repeating-linear-gradient(90deg, var(--s-previous) 0 5px, transparent 5px 9px)", "Last week's median");
+    host.append(lg);
+  }
+  host.append(wrap);
+}
+function addWeeks(s, h) { const d = new Date(s + "T00:00:00"); d.setDate(d.getDate() + 7 * h); return d.toISOString().slice(0, 10); }
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); for (const k of [1, 2, 2.5, 5, 10]) if (k * p >= v) return k * p; return 10 * p; }
+function ticks(max) { const step = niceMax(max / 4); const out = []; for (let t = 0; t <= max + 1e-9; t += step) out.push(t); return out; }
+
+// ---------------------------------------------------------------- bars (rate change, peak week)
+const RATE = [["large_decrease", "Large decrease", "--div-neg-2"], ["decrease", "Decrease", "--div-neg-1"], ["stable", "Stable", "--div-mid"], ["increase", "Increase", "--div-pos-1"], ["large_increase", "Large increase", "--div-pos-2"]];
+function rateChart(host, L) {
+  host.innerHTML = "";
+  const t = el("table");
+  const hr = el("tr"); hr.append(el("th", { class: "l" }, "Horizon"));
+  for (const [, label] of RATE) hr.append(el("th", {}, label));
+  t.append(el("thead")); t.tHead.append(hr);
+  const tb = el("tbody");
+  for (const h of [0, 1, 2, 3]) {
+    const r = L.rate[h] || {};
+    const tr = el("tr"); tr.append(el("td", { class: "l" }, `${h} (${fmtDate(addWeeks(D.ref_date, h))})`));
+    for (const [k, , col] of RATE) {
+      const p = r[k] || 0, td = el("td");
+      const bar = el("div", { style: `display:flex;align-items:center;justify-content:flex-end;gap:6px` });
+      const fill = el("span", { style: `display:inline-block;height:10px;width:${Math.round(p * 46)}px;background:var(${col});border-radius:2px` });
+      bar.append(fill, el("span", {}, Math.round(p * 100) + "%")); td.append(bar); tr.append(td);
+    }
+    tb.append(tr);
+  }
+  t.append(tb); host.append(t);
+}
+function peakChart(host, L) {
+  host.innerHTML = "";
+  const pts = L.peak_week.filter(p => p.p != null);
+  if (!pts.length) return;
+  const W = 380, H = 150, m = { t: 8, r: 8, b: 22, l: 8 };
+  const pmax = Math.max(...pts.map(p => p.p), 0.01);
+  const bw = (W - m.l - m.r) / pts.length;
+  const svg = sv("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${L.name}: probability of each week being the peak` });
+  const wrap = el("div", { class: "chart" }); const tip = el("div", { class: "tip" });
+  let lastMonth = -1;
+  pts.forEach((p, i) => {
+    const h = p.p / pmax * (H - m.t - m.b);
+    const r = sv("rect", { x: m.l + i * bw + 1, y: H - m.b - h, width: Math.max(1, bw - 2), height: Math.max(h, 0), rx: 2, fill: "var(--s-forecast)" });
+    const hit = sv("rect", { x: m.l + i * bw, y: m.t, width: bw, height: H - m.t - m.b, fill: "transparent" });
+    hit.addEventListener("pointermove", (ev) => { const rr = svg.getBoundingClientRect();
+      tip.replaceChildren(el("div", { class: "t" }, "Week ending " + fmtDate(p.week))); const d = el("div"); d.append(el("b", {}, (p.p * 100).toFixed(1) + "%"), document.createTextNode(" chance of the peak")); tip.append(d);
+      tip.style.display = "block"; tip.style.left = Math.min((ev.clientX - rr.left) + 10, rr.width - tip.offsetWidth - 4) + "px"; tip.style.top = "0px"; });
+    hit.addEventListener("pointerleave", () => tip.style.display = "none");
+    svg.append(r, hit);
+    const d = new Date(p.week + "T00:00:00");
+    if (d.getMonth() !== lastMonth && d.getDate() <= 7) { lastMonth = d.getMonth();
+      const tx = sv("text", { x: m.l + i * bw + bw / 2, y: H - 6, "text-anchor": "start", "font-size": 10, fill: "var(--muted)" }); tx.textContent = d.toLocaleDateString(undefined, { month: "short" }); svg.append(tx); }
+  });
+  svg.append(sv("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: "var(--axis)" }));
+  wrap.append(svg, tip); host.append(wrap);
+  const kv = $("#loc-peaksize"); kv.innerHTML = "";
+  const ps = L.peak_size;
+  const best = pts.reduce((a, b) => b.p > a.p ? b : a);
+  for (const [k, v] of [["Most likely peak week", fmtDate(best.week) + ` (${Math.round(best.p * 100)}%)`], ["Peak size, median", fmt(ps["0.5"])], ["Peak size, 50% range", `${fmt(ps["0.25"])} – ${fmt(ps["0.75"])}`], ["Peak size, 90% range", `${fmt(ps["0.05"])} – ${fmt(ps["0.95"])}`]]) { kv.append(el("div", {}, k), el("div", {}, v)); }
+}
+
+// ---------------------------------------------------------------- tables
+function makeTable(host, cols, rows, onClick) {
+  host.innerHTML = "";
+  const t = el("table"), th = el("thead"), tr = el("tr");
+  let sortKey = null, asc = true;
+  cols.forEach(c => { const h = el("th", c.left ? { class: "l" } : {}, c.label); h.addEventListener("click", () => { asc = sortKey === c.key ? !asc : true; sortKey = c.key; draw(); }); tr.append(h); });
+  th.append(tr); t.append(th);
+  const tb = el("tbody"); t.append(tb);
+  const draw = () => {
+    tb.innerHTML = "";
+    const rs = rows.slice();
+    if (sortKey) rs.sort((a, b) => { const x = a[sortKey], y = b[sortKey]; if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * (asc ? 1 : -1); });
+    for (const r of rs) { const row = el("tr"); cols.forEach(c => row.append(el("td", c.left ? { class: "l" } : {}, c.f ? c.f(r[c.key], r) : (r[c.key] ?? "–")))); if (onClick) { row.style.cursor = "pointer"; row.addEventListener("click", () => onClick(r)); } tb.append(row); }
+  };
+  draw(); host.append(t);
+}
+
+// ---------------------------------------------------------------- sections
+function overview() {
+  const s = D.summary;
+  $("#meta").textContent = `${D.model} · reference date ${D.ref_date} · data through ${D.last_obs} · generated ${D.generated}`;
+  const tiles = $("#tiles"); tiles.innerHTML = "";
+  const us = byLoc["US"];
+  const tile = (v, k) => { const t = el("div", { class: "tile" }); t.append(el("div", { class: "v" }, v), el("div", { class: "k" }, k)); tiles.append(t); };
+  if (us) { tile(fmt(us.median[0]), "US admissions, this week (median)"); tile(fmt(us.median[3]), "US admissions in 3 weeks (median)"); }
+  tile(`${s.regions_built} / ${s.regions_total}`, "regions simulated this week");
+  tile(`${s.us_coverage}%`, "of the US population in simulated regions");
+  const ul = $("#checks"); ul.innerHTML = "";
+  const order = { error: 0, warning: 1, info: 2 };
+  const cs = D.checks.slice().sort((a, b) => order[a.level] - order[b.level]);
+  if (!cs.length) { const li = el("li"); li.append(el("span", { class: "badge ok" }, "ok"), el("span", {}, "No problems found.")); ul.append(li); }
+  for (const c of cs) { const li = el("li"); li.append(el("span", { class: "badge " + c.level }, c.level), el("span", {}, c.text)); ul.append(li); }
+  if (us) fanChart($("#us-chart"), "US", { from: addWeeks(D.last_obs, -16) }); else $("#us-chart").textContent = "No US forecast this week (not every jurisdiction has one).";
+}
+function locations() {
+  const sel = $("#loc");
+  if (!sel.options.length) { for (const l of D.locations) sel.append(el("option", { value: l.location }, l.name)); sel.addEventListener("change", locations); }
+  const L = byLoc[sel.value];
+  $("#loc-title").textContent = L.name + " — weekly admissions";
+  $("#loc-note").textContent = L.scaled_from ? `Scaled from simulated group ${L.scaled_from}` : (L.coverage != null ? `${L.coverage}% of the population simulated` : "");
+  fanChart($("#loc-chart"), L.location, { height: 320 });
+  rateChart($("#loc-rate"), L);
+  peakChart($("#loc-peak"), L);
+  const rows = weeks.map((w, i) => ({ week: w, obs: L.observed[i], q025: L.bands["0.025"][i], q50: L.bands["0.5"][i], q975: L.bands["0.975"][i] })).filter(r => r.obs != null || r.q50 != null);
+  makeTable($("#loc-table"), [{ key: "week", label: "Week ending", left: true }, { key: "obs", label: "Reported", f: fmt }, { key: "q025", label: "2.5%", f: fmt }, { key: "q50", label: "Median", f: fmt }, { key: "q975", label: "97.5%", f: fmt }], rows);
+}
+function multiples() {
+  const host = $("#multiples"); if (host.childElementCount) { host.innerHTML = ""; }
+  for (const L of D.locations) {
+    const c = el("div", { class: "card", tabindex: 0 });
+    const n = el("div", { class: "name" }, L.name); n.append(el("span", {}, fmt(L.median[0])));
+    const ch = el("div"); c.append(n, ch); host.append(c);
+    fanChart(ch, L.location, { mini: true, from: addWeeks(D.last_obs, -12) });
+    const open = () => { $("#loc").value = L.location; showTab("locations"); };
+    c.addEventListener("click", open); c.addEventListener("keydown", e => { if (e.key === "Enter") open(); });
+  }
+}
+let curRegion = null;
+function regions() {
+  const q = ($("#reg-filter").value || "").toLowerCase();
+  const rows = D.regions.filter(r => !q || r.name.toLowerCase().includes(q) || r.group.includes(q));
+  makeTable($("#reg-table"), [
+    { key: "name", label: "Region", left: true }, { key: "pop", label: "Population", f: v => (v / 1e6).toFixed(2) + "M" },
+    { key: "states", label: "States", left: true }, { key: "ess", label: "ESS", f: v => v == null ? "–" : v.toFixed(1) },
+    { key: "mode", label: "Network", left: true, f: v => v ?? "not run" }], rows, r => { curRegion = r.group; regionDetail(); });
+  if (!curRegion) { const first = D.regions.find(r => r.built); if (first) curRegion = first.group; }
+  regionDetail();
+}
+$("#reg-filter").addEventListener("input", regions);
+function regionDetail() {
+  const r = D.regions.find(x => x.group === curRegion);
+  const host = $("#reg-chart"); host.innerHTML = ""; $("#reg-params").innerHTML = "";
+  if (!r) return;
+  $("#reg-title").textContent = r.name;
+  if (!r.built) { $("#reg-note").textContent = "No results for this region this week."; return; }
+  $("#reg-note").textContent = `Fit to the region's population share of its states' admissions (sum over ${r.states.split(" ").length} state piece(s)). ${r.n.toLocaleString()} agents, ${r.mode} network.`;
+  // reuse the fan chart with a temporary location record
+  byLoc["__region"] = { location: "__region", name: r.name, observed: r.observed, bands: r.bands, nowcast: [], previous: {} };
+  fanChart(host, "__region", { height: 260 });
+  const kv = $("#reg-params");
+  const label = { beta_scale: "Transmissibility (β scale)", immune_scale: "Prior immunity scale", import_scale: "Importation scale", season_amplitude: "Seasonal amplitude" };
+  for (const [k, v] of Object.entries(r.params)) kv.append(el("div", {}, (label[k] || k.replace("mult_", "Admission multiplier, state "))), el("div", {}, v.map(x => x == null ? "–" : x).join(" / ")));
+}
+function summary() {
+  makeTable($("#summary"), [
+    { key: "name", label: "Location", left: true }, { key: "last", label: "Last reported", f: fmt },
+    { key: "h0", label: "This week", f: fmt }, { key: "h1", label: "+1 wk", f: fmt }, { key: "h2", label: "+2 wk", f: fmt }, { key: "h3", label: "+3 wk", f: fmt },
+    { key: "peak_week", label: "Likeliest peak", f: v => v ? fmtDate(v) : "–" }, { key: "peak_size", label: "Peak size", f: fmt },
+    { key: "coverage", label: "Simulated %", f: v => v == null ? "–" : v + "%" }], D.table, r => { $("#loc").value = r.location; showTab("locations"); });
+}
+function renderAll() {
+  const vis = TABS.find(([t]) => !$("#tab-" + t).hidden)[0];
+  ({ overview, locations, multiples, regions, table: summary, method: () => {} })[vis]();
+}
+const start = location.hash.slice(1);
+if (TABS.some(([t]) => t === start)) showTab(start); else overview();
+</script>
+</body>
+</html>

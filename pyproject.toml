@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fluffhead"
+version = "0.1.0"
+description = "FLU Forecasting Framework for Heterogeneous Edge-Activated Dynamics: a network agent-based model for FluSight"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "numba",
+    "pyarrow",
+    "requests",
+    "xlrd",
+    "openpyxl",
+    "psutil",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+fluffhead = "fluffhead.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["fluffhead*"]
+
+[tool.setuptools.package-data]
+fluffhead = ["report_template.html", "greasypop_env/*.jl", "greasypop_env/*.R", "greasypop_env/*.toml"]

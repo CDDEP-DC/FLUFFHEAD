@@ -1,0 +1,117 @@
+group,name,pop,n_units,n_counties,states,commute_states,units,reason
+csa408,"New York-Newark, NY-NJ-CT-PA",22589036,1,31,09 34 36 42,09 34 36 42,csa408,top
+csa348,"Los Angeles-Long Beach, CA",18711436,1,5,06,06,csa348,top
+csa176,"Chicago-Naperville, IL-IN-WI",9825325,1,19,17 18 55,17 18 26 55,csa176,top
+csa548,"Washington-Baltimore-Arlington, DC-MD-VA-WV-PA",9814928,1,41,11 24 42 51 54,10 11 24 42 51 54,csa548,top
+csa488,"San Jose-San Francisco-Oakland, CA",9665887,1,14,06,06,csa488,top
+csa148,"Boston-Worcester-Providence, MA-RI-NH-CT",8287710,1,19,09 25 33 44,09 23 25 33 36 44,csa148,top
+csa206,"Dallas-Fort Worth, TX-OK",8057796,1,19,40 48,40 48,csa206,top
+csa288,"Houston-The Woodlands, TX",7253193,1,13,48,22 48,csa288,top
+csa428,"Philadelphia-Reading-Camden, PA-NJ-DE-MD",7209620,1,16,10 24 34 42,10 24 34 36 42,csa428,top
+csa370,"Miami-Port St. Lucie-Fort Lauderdale, FL",6889936,1,7,12,12,csa370,top
+csa122,"Atlanta--Athens-Clarke County--Sandy Springs, GA-AL",6853392,1,42,01 13,01 12 13 37 45,csa122,top
+csa220,"Detroit-Warren-Ann Arbor, MI",5341994,1,10,26,26 39,csa220,top
+csa429,"Phoenix-Mesa, AZ",5002221,1,3,04,04 06,csa429,top
+csa500,"Seattle-Tacoma, WA",4903675,1,9,53,06 53,csa500,top
+csa422,"Orlando-Lakeland-Deltona, FL",4160646,1,9,12,12,csa422,top
+csa378,"Minneapolis-St. Paul, MN-WI",4027861,1,21,27 55,27 55,csa378,top
+csa216,"Denver-Aurora, CO",3617927,1,12,08,08,csa216,top
+csa184,"Cleveland-Akron-Canton, OH",3586918,1,14,39,39 42,csa184,top
+cbsa41740,"San Diego-Chula Vista-Carlsbad, CA",3338330,1,1,06,06,cbsa41740,top
+csa440,"Portland-Vancouver-Salem, OR-WA",3259710,1,12,41 53,06 41 53,csa440,top
+cbsa45300,"Tampa-St. Petersburg-Clearwater, FL",3194831,1,4,12,12,cbsa45300,top
+csa476,"St. Louis-St. Charles-Farmington, MO-IL",2907648,1,17,17 29,17 29,csa476,top
+csa172,"Charlotte-Concord, NC-SC",2797636,1,13,37 45,12 13 37 45 51,csa172,top
+csa482,"Salt Lake City-Provo-Orem, UT",2641048,1,10,49,06 49,csa482,top
+csa472,"Sacramento-Roseville, CA",2639124,1,7,06,06 32,csa472,top
+csa430,"Pittsburgh-New Castle-Weirton, PA-OH-WV",2603259,1,12,39 42 54,39 42 54,csa430,top
+csa484,"San Antonio-New Braunfels-Pearsall, TX",2571266,1,9,48,48,csa484,top
+csa198,"Columbus-Marion-Zanesville, OH",2525639,1,17,39,39,csa198,top
+csa312,"Kansas City-Overland Park-Kansas City, MO-KS",2501151,1,22,20 29,20 29,csa312,top
+csa294,"Indianapolis-Carmel-Muncie, IN",2457286,1,18,18,17 18 21 39,csa294,top
+csa332,"Las Vegas-Henderson, NV",2313238,1,2,32,04 06 32 49,csa332,top
+csa178,"Cincinnati-Wilmington-Maysville, OH-KY-IN",2280246,1,18,18 21 39,18 21 39,csa178,top
+cbsa12420,"Austin-Round Rock-Georgetown, TX",2227083,1,5,48,48,cbsa12420,top
+csa450,"Raleigh-Durham-Cary, NC",2079687,1,9,37,37 51,csa450,top
+csa400,"Nashville-Davidson--Murfreesboro, TN",2062547,1,16,47,01 13 21 47,csa400,top
+csa376,"Milwaukee-Racine-Waukesha, WI",2047966,1,8,55,17 55,csa376,top
+csa515,"South Bend-Elkhart-Mishawaka, IN-MI + Fort Wayne-Huntington-Auburn, IN + Kalamazoo-Battle Creek-Portage, MI",1952444,3,18,18 26,17 18 26 39,csa515 csa258 csa310,top
+csa545,"Virginia Beach-Norfolk, VA-NC",1859197,1,22,37 51,37 51,csa545,top
+csa268,"Greensboro--Winston-Salem--High Point, NC",1689151,1,10,37,13 37 45 51,csa268,top
+csa300,"Jacksonville-St. Marys-Palatka, FL-GA",1688701,1,7,12 13,12 13,csa300,top
+csa380,"Mobile-Daphne-Fairhope, AL + Pensacola-Ferry Pass, FL-AL + Gulfport-Biloxi, MS",1609697,3,10,01 12 28,01 12 22 28 48,csa380 csa426 cbsa25060,state 28 top
+csa192,"Columbia-Orangeburg-Newberry, SC + Augusta-Richmond County, GA-SC",1572028,2,15,13 45,13 37 45,csa192 cbsa12260,top
+csa406,"New Orleans-Metairie-Hammond, LA-MS",1507017,1,11,22 28,01 12 22 28 48,csa406,top
+csa350,"Louisville/Jefferson County--Elizabethtown--Bardstown, KY-IN",1489142,1,15,18 21,18 21 39,csa350,top
+csa416,"Oklahoma City-Shawnee, OK",1481542,1,8,40,40 48,csa416,top
+cbsa12940,"Baton Rouge, LA + Lafayette-Opelousas-Morgan City, LA",1475563,2,17,22,22 28 48,cbsa12940 csa318,top
+csa273,"Greenville-Spartanburg-Anderson, SC",1475235,1,9,45,13 37 45,csa273,top
+csa278,"Hartford-East Hartford, CT",1470083,1,4,09,09 25 36 44,csa278,top
+csa266,"Grand Rapids-Kentwood-Muskegon, MI",1412470,1,7,26,26,csa266,top
+cbsa10900,"Allentown-Bethlehem-Easton, PA-NJ + Scranton--Wilkes-Barre, PA",1397937,2,7,34 42,34 36 42,cbsa10900 cbsa42540,top
+csa365,"McAllen-Edinburg, TX + Brownsville-Harlingen-Raymondville, TX",1377861,2,4,48,48,csa365 csa154,top
+csa368,"Memphis-Forrest City, TN-MS-AR",1371039,1,9,05 28 47,05 28 47 48,csa368,top
+cbsa12540,"Bakersfield, CA + Visalia, CA",1366397,2,2,06,06,cbsa12540 cbsa47300,top
+csa420,"Omaha-Council Bluffs-Fremont, NE-IA + Lincoln-Beatrice, NE",1343894,2,12,19 31,19 29 31,csa420 csa339,state 31 top
+csa357,"Madison-Janesville-Beloit, WI + Rockford-Freeport-Rochelle, IL",1323918,2,10,17 55,17 55,csa357 csa466,top
+csa142,"Birmingham-Hoover-Talladega, AL",1317702,1,9,01,01 12 13 47,csa142,top
+csa260,"Fresno-Madera-Hanford, CA",1309368,1,3,06,06,csa260,top
+cbsa40060,"Richmond, VA",1291900,1,17,51,24 37 51,cbsa40060,top
+csa276,"Harrisburg-York-Lebanon, PA",1271801,1,6,42,24 42,csa276,top
+csa160,"Buffalo-Cheektowaga-Olean, NY",1204100,1,3,36,36 42,csa160,top
+csa163,"Cape Coral-Fort Myers-Naples, FL",1197501,1,3,12,12 17,csa163,top
+csa104,"Albany-Schenectady, NY",1167594,1,10,36,25 34 36 50,csa104,top
+csa464,"Rochester-Batavia-Seneca Falls, NY",1160940,1,8,36,36 42,csa464,top
+csa106,"Albuquerque-Santa Fe-Las Vegas, NM",1158464,1,9,35,04 08 35 48,csa106,top
+csa315,"Knoxville-Morristown-Sevierville, TN",1146049,1,13,47,13 21 37 47,csa315,top
+csa538,"Tulsa-Muskogee-Bartlesville, OK",1118150,1,9,40,20 40 48,csa538,top
+csa536,"Tucson-Nogales, AZ",1093777,1,2,04,04 06,csa536,top
+csa212,"Dayton-Springfield-Kettering, OH",1080282,1,7,39,18 21 39,csa212,top
+csa412,"North Port-Sarasota, FL",1063906,1,4,12,12,csa412,top
+csa238,"El Paso-Las Cruces, TX-NM",1062319,1,3,35 48,35 48,csa238,top
+csa174,"Chattanooga-Cleveland-Dalton, TN-GA",1004573,1,14,13 47,01 13 47,csa174,top
+cbsa46520,"Urban Honolulu, HI",974563,1,1,15,06 15,cbsa46520,top
+csa194,"Columbus-Auburn-Opelika, GA-AL + Montgomery-Selma-Alexander City, AL",947106,2,15,01 13,01 12 13,csa194 csa388,top
+csa340,"Little Rock-North Little Rock, AR",908941,1,10,05,05 48,csa340,top
+csa218,"Des Moines-Ames-West Des Moines, IA",877991,1,10,19,17 19 27 29,csa218,top
+csa246,"Fayetteville-Sanford-Lumberton, NC",854826,1,7,37,13 37 45 51,csa246,top
+csa534,"Toledo-Findlay-Tiffin, OH",831295,1,7,39,26 39,csa534,top
+csa147,"Boise City-Mountain Home-Ontario, ID-OR",831235,1,8,16 41,16 41 53,csa147,top
+cbsa16700,"Charleston-North Charleston, SC",802122,1,3,45,13 37 45,cbsa16700,top
+csa170,"Charleston-Huntington-Ashland, WV-OH-KY",776694,1,16,21 39 54,21 39 42 54,csa170,top
+cbsa17820,"Colorado Springs, CO",745791,1,2,08,08 48,cbsa17820,top
+csa336,"Lexington-Fayette--Richmond--Frankfort, KY",745033,1,13,21,21 39,csa336,top
+csa518,"Spokane-Spokane Valley-Coeur d'Alene, WA-ID",734218,1,3,16 53,16 30 53,csa518,top
+csa532,"Syracuse-Auburn, NY",725169,1,4,36,36,csa532,top
+cbsa44140,"Springfield, MA",697382,1,3,25,09 25 33 36 50,cbsa44140,top
+csa556,"Wichita-Winfield, KS",675126,1,5,20,20 40 48,csa556,top
+csa298,"Jackson-Vicksburg-Brookhaven, MS",674340,1,9,28,01 22 28 48,csa298,top
+csa438,"Portland-Lewiston-South Portland, ME",646777,1,4,23,23 25 33 36,csa438,top
+csa456,"Reno-Carson City-Fernley, NV",637973,1,5,32,06 32,csa456,top
+csa566,"Youngstown-Warren, OH-PA",637964,1,4,39 42,18 39 42 54,csa566,top
+csa290,"Huntsville-Decatur, AL",624427,1,4,01,01 13 47,csa290,top
+cbsa37340,"Palm Bay-Melbourne-Titusville, FL",601942,1,1,12,12 13,cbsa37340,top
+csa496,"Savannah-Hinesville-Statesboro, GA",583882,1,7,13,12 13 37 45,csa496,top
+csa396,"Myrtle Beach-Conway, SC-NC",559581,1,3,37 45,37 45 51,csa396,top
+cbsa29620,"Lansing-East Lansing, MI",550391,1,4,26,26,cbsa29620,top
+cbsa29540,"Lancaster, PA",545724,1,1,42,10 24 34 42,cbsa29540,top
+csa120,"Asheville-Marion-Brevard, NC",542821,1,6,37,13 37 45 47,csa120,top
+csa204,"Corpus Christi-Kingsville-Alice, TX",535257,1,7,48,22 48,csa204,top
+cbsa22220,"Fayetteville-Springdale-Rogers, AR",534904,1,3,05,05 29 40 48,cbsa22220,top
+csa304,"Johnson City-Kingsport-Bristol, TN-VA",510851,1,8,47 51,37 47 51,csa304,top
+cbsa44180,"Springfield, MO",470300,1,5,29,05 20 29,cbsa44180,top
+csa209,"Davenport-Moline, IA-IL",468265,1,6,17 19,17 19,csa209,top
+cbsa28660,"Killeen-Temple, TX",460303,1,3,48,48,cbsa28660,top
+csa480,"Salisbury-Cambridge, MD-DE",447655,1,5,10 24,10 11 24 34 36 42 51,csa480,top
+cbsa42200,"Santa Maria-Santa Barbara, CA",446499,1,1,06,06,cbsa42200,top
+csa168,"Cedar Rapids-Iowa City, IA",446137,1,5,19,17 19,csa168,top
+cbsa41500,"Salinas, CA",434061,1,1,06,06,cbsa41500,top
+csa508,"Shreveport-Bossier City-Minden, LA",433046,1,4,22,05 22 48,csa508,top
+cbsa11260,"Anchorage, AK",396317,1,2,02,02 06 48 53,cbsa11260,state 02
+csa162,"Burlington-South Burlington-Barre, VT",278820,1,4,50,25 33 36 50,csa162,state 50
+csa244,"Fargo-Wahpeton, ND-MN",268529,1,4,27 38,27 38 46 48,csa244,state 38
+cbsa43620,"Sioux Falls, SD",268232,1,4,46,19 27 46,cbsa43620,state 46
+csa390,"Morgantown-Fairmont, WV",195116,1,3,54,24 39 42 51 54,csa390,state 54
+cbsa13740,"Billings, MT",181667,1,3,30,06 30 38 56,cbsa13740,state 30
+cbsa12620,"Bangor, ME",152148,1,1,23,23,cbsa12620,state 23
+cbsa16940,"Cheyenne, WY",99500,1,1,56,08 31 46 48 56,cbsa16940,state 56
