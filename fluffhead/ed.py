@@ -4,7 +4,9 @@ CDC dataset rdmq-nq56 gives, each week, the percent of ED visits that are for
 influenza in each Health Service Area (HSA; one or more counties that share care
 seeking), reported on every county of the HSA, plus a state row. 13 states
 (including CA, FL, PA, OH, WA) report no sub-state values; their counties take the
-state value, so they fall back to population shares.
+state value, so they fall back to population shares, unless a state health
+department source gives county-to-state ratios (state_data.py: CA regional
+admissions, PA county cases), in which case county % = state % x ratio.
 
 A county's flu activity in a week is its population x (3-week mean flu % + FLOOR).
 The floor keeps weeks with almost no flu (and tiny, noisy percentages) close to
@@ -73,6 +75,13 @@ def activity(start: dt.date, end: dt.date) -> pd.DataFrame:
     for s, cols in pct.columns.groupby(state_of[pct.columns]).items():
         if s in fill:
             pct[cols] = pct[cols].apply(lambda col: col.fillna(fill[s]))
+    from . import state_data as SD
+    for s, ratio in SD.ratios(weeks).items():
+        if s not in fill:
+            continue
+        r = ratio.reindex(columns=[c for c in pct.columns if state_of[c] == s])
+        pct[r.columns] = (r.mul(fill[s], axis=0)).where(r.notna(), pct[r.columns])
+        log.info("county ratios from state data for %s (%d weeks)", s, int(r.notna().any(axis=1).sum()))
     pct = pct.rolling(SMOOTH_WEEKS, min_periods=1).mean()
     act = (pct + FLOOR) * pop
     n_sub = hsa.dropna(subset=["percent_visits_influenza"]).fips.str[:2].nunique()
