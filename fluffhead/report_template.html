@@ -131,7 +131,7 @@ button.theme { margin-left: auto; font: inherit; font-size: 12px; background: no
       <h2>How this forecast is made</h2>
       <p><b>Population and contacts.</b> Each simulated region is a CSA or stand-alone metro area (small, strongly commuting-linked ones merged). GREASYPOP-CO builds its synthetic population from the 2015–19 ACS, PUMS, LODES and NCES school data: households, schools, workplaces and group quarters. Contacts within households are complete; workplaces and schools are stochastic block models (by income category and grade); group quarters are small-world graphs; community encounters are drawn from the residents and workers of a census tract.</p>
       <p><b>Transmission.</b> Event-driven: when an agent is infected their whole course is drawn (latent, presymptomatic, symptomatic or asymptomatic, possible admission), and each contact gets candidate transmission events at the layer's rate. Weekends, school calendars and a winter seasonality factor thin those events; so do prior immunity and vaccination (CDC NIS-Flu coverage by state, age and month, 2025–26 standing in until 2026–27 data exist).</p>
-      <p><b>Fitting.</b> Each region is fitted to its share of its states' weekly admissions (by population; the last two weeks nowcast for backfill with flusight-fm's revision model). Transmissibility, prior immunity, importation and seasonality are drawn from priors and weighted by a negative binomial likelihood; a per-state admission multiplier is estimated in closed form. Kept draws are continued to the end of the season several times each.</p>
+      <p><b>Fitting.</b> Each region is fitted to its share of its states' weekly admissions: its population share, reweighted each week by NSSP flu emergency department visits by health service area (states without sub-state ED data use population shares). The last two weeks are nowcast for backfill with flusight-fm's revision model. Transmissibility, prior immunity, importation and seasonality are fitted by adaptive importance sampling (three rounds, each proposing around the best draws so far) with a negative binomial likelihood that weights recent weeks more (4-week half-life). Model admissions are the simulated epidemic times a per-state multiplier (log-normal prior, median 1) plus a constant background set from the season's first four weeks. If no draw follows the data closely the likelihood is tempered (power φ &lt; 1) to keep at least 20 effective draws. Kept draws are continued to the end of the season several times each.</p>
       <p><b>From regions to states.</b> A state's forecast is the sum of its simulated parts divided by the share of the state they cover: the rest of the state is assumed to share their per-capita rate. Puerto Rico follows Miami's per-capita curve, levelled to its own recent reports. Regions are tied together by a Gaussian copula on their season totals, so the national total keeps realistic spread. US = sum of the jurisdictions.</p>
       <p><b>Known limits.</b> Importation pressure after the data cutoff is held at its last level. Disease parameters are literature priors, not estimated here beyond the four fitted ones. GREASYPOP uses 2019 boundaries and populations, rescaled to current hub populations.</p>
     </div>
@@ -387,6 +387,7 @@ function regions() {
   makeTable($("#reg-table"), [
     { key: "name", label: "Region", left: true }, { key: "pop", label: "Population", f: v => (v / 1e6).toFixed(2) + "M" },
     { key: "states", label: "States", left: true }, { key: "ess", label: "ESS", f: v => v == null ? "–" : v.toFixed(1) },
+    { key: "phi", label: "φ", f: v => v == null ? "–" : v.toFixed(2) },
     { key: "mode", label: "Network", left: true, f: v => v ?? "not run" }], rows, r => { curRegion = r.group; regionDetail(); });
   if (!curRegion) { const first = D.regions.find(r => r.built); if (first) curRegion = first.group; }
   regionDetail();
@@ -398,7 +399,7 @@ function regionDetail() {
   if (!r) return;
   $("#reg-title").textContent = r.name;
   if (!r.built) { $("#reg-note").textContent = "No results for this region this week."; return; }
-  $("#reg-note").textContent = `Fit to the region's population share of its states' admissions (sum over ${r.states.split(" ").length} state piece(s)). ${r.n.toLocaleString()} agents, ${r.mode} network.`;
+  $("#reg-note").textContent = `Fit to the region's share of its states' admissions (population share reweighted by flu ED visits; sum over ${r.states.split(" ").length} state piece(s)). ${r.n.toLocaleString()} agents, ${r.mode} network, ESS ${r.ess}, φ ${r.phi ?? 1}.`;
   // reuse the fan chart with a temporary location record
   byLoc["__region"] = { location: "__region", name: r.name, observed: r.observed, bands: r.bands, nowcast: [], previous: {} };
   fanChart(host, "__region", { height: 260 });

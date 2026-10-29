@@ -1,7 +1,8 @@
 """One week's forecast: data and nowcast, region fits and forecasts, submission.
 
     data      hub target data through the last reported week, nowcast-revised
-              (flusight-fm's revision model, learned from the hub's data versions)
+              (flusight-fm's revision model, learned from the hub's data versions),
+              and NSSP flu ED visits by sub-state region (ed.py)
     regions   each simulation group is fitted to its share of its states' data and
               run to the end of the season, in parallel worker processes
               (runs/<ref_date>/regions/<group>.npz)
@@ -14,6 +15,7 @@ import json
 import logging
 import os
 import subprocess
+import zlib
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
@@ -23,6 +25,7 @@ import pandas as pd
 
 from . import calibrate as CB
 from . import config as C
+from . import ed as ED
 from . import hub_data as D
 from . import network as N
 from . import nowcast as nc
@@ -40,6 +43,7 @@ class WeekData:
     revised: pd.DataFrame        # long: date, location, value (nowcast medians in the last weeks)
     nowcasts: pd.DataFrame       # flusight-fm nowcast table (mu, sd on log(x + 1))
     warnings: list
+    activity: pd.DataFrame       # [weeks, county FIPS] NSSP flu ED activity (empty: population shares)
 
 
 def reference_date_for(day: dt.date) -> dt.date:
@@ -79,7 +83,13 @@ def load_week(ref_date: dt.date, nowcast: bool = True) -> WeekData:
     revised, table = nc.nowcast(series, models, prior, C.LOG_OFFSET, adjust=nowcast)
     rev = pd.concat([s.rename("value").rename_axis("date").reset_index().assign(location=loc)
                      for loc, s in revised.items()], ignore_index=True)
-    return WeekData(ref_date, last_obs, locations, rev, table, warnings)
+    from .calibrate import season_start
+    activity = ED.activity(season_start(last_obs.date()), last_obs.date())
+    if activity.empty:
+        warnings.append("NSSP ED data unavailable: regions get population shares of their states")
+    elif activity.index.max() < last_obs:
+        warnings.append(f"NSSP ED data end {activity.index.max().date()}; later weeks reuse the last shares")
+    return WeekData(ref_date, last_obs, locations, rev, table, warnings, activity)
 
 
 # ------------------------------------------------------------------ regions
@@ -90,21 +100,23 @@ def built_groups() -> list[str]:
 
 
 def run_region(group: str, wk: WeekData, out_dir: Path, n_draws: int, n_keep: int, n_cont: int,
-               n_parallel: int = 1, seed: int = 1) -> Path:
+               n_parallel: int = 1, seed: int | None = None) -> Path:
     logging.basicConfig(level=logging.INFO, format=f"%(asctime)s {group} %(message)s")
+    seed = seed if seed is not None else zlib.crc32(group.encode()) % (2**31 - 2) + 1   # each region its own stream
     net = N.load(group)
     cutoff = wk.last_obs.date()
     national = (wk.revised[wk.revised.location == "US"].set_index("date").value
                 / wk.locations.set_index("location").population["US"])
-    region = CB.setup(group, net, cutoff, C.SEASON_END, wk.locations, n_parallel=n_parallel)
+    region = CB.setup(group, net, cutoff, C.SEASON_END, wk.locations, n_parallel=n_parallel, activity=wk.activity)
     fit = CB.fit(region, wk.revised, national, cutoff, n_draws=n_draws, n_keep=n_keep, seed=seed)
     fc = CB.forecast(region, fit, national, n_cont=n_cont, seed=seed + 1)
     path = out_dir / f"{group}.npz"
     np.savez_compressed(path, daily=fc["daily"].astype(np.float32), dates=fc["dates"].values,
                         pieces=np.array(region.pieces), shares=region.piece_share,
+                        activity_shares=region.forecast_share(),
                         weeks=fit.weeks.values, observed=fit.observed)
     fit.theta.to_csv(out_dir / f"{group}-draws.csv", index=False)
-    (out_dir / f"{group}.json").write_text(json.dumps({"ess": fit.ess, "mode": region.pool.mode,
+    (out_dir / f"{group}.json").write_text(json.dumps({"ess": fit.ess, "phi": fit.phi, "mode": region.pool.mode,
                                                        "n": int(net.n), "pieces": region.pieces}))
     return path
 
@@ -135,16 +147,18 @@ def combine(wk: WeekData, region_dir: Path, seed: int = 7):
     rng = np.random.default_rng(seed)
     weeks = S.season_weeks(dt.date(wk.ref_date.year if wk.ref_date.month >= 8 else wk.ref_date.year - 1, 8, 1),
                            C.SEASON_END)
-    weekly, pieces, shares = {}, {}, {}
+    weekly, pieces, shares, act = {}, {}, {}, {}
     for f in sorted(region_dir.glob("*.npz")):
         z = np.load(f, allow_pickle=False)
         res = {"daily": z["daily"].astype(float), "dates": pd.DatetimeIndex(z["dates"])}
         weekly[f.stem] = S.region_weekly(res, weeks)
         pieces[f.stem] = list(z["pieces"])
         shares[f.stem] = z["shares"]
+        act[f.stem] = z["activity_shares"] if "activity_shares" in z else z["shares"]
     window = (weeks > wk.last_obs) & (weeks <= pd.Timestamp(C.SEASON_END))
     picks = S.joint_samples(weekly, window, rng)
-    states = S.state_samples(weekly, pieces, shares, picks, wk.revised, weeks, wk.locations, wk.last_obs.date(), rng)
+    states = S.state_samples(weekly, pieces, shares, act, picks, wk.revised, weeks, wk.locations,
+                             wk.last_obs.date(), rng)
     locs = wk.locations[wk.locations.location.isin(list(states) + ["US"])]
     juris = [l for l in wk.locations.location if l != "US"]
     df, noisy = S.build(states, weeks, wk.revised, wk.nowcasts, locs, wk.ref_date, rng, juris)
@@ -153,7 +167,7 @@ def combine(wk: WeekData, region_dir: Path, seed: int = 7):
     return df, noisy, weeks, problems, absent
 
 
-def run(ref_date: dt.date, groups: list[str] | None = None, workers: int = 4, n_draws: int = 200,
+def run(ref_date: dt.date, groups: list[str] | None = None, workers: int = 4, n_draws: int = 300,
         n_keep: int = 20, n_cont: int = 5, nowcast: bool = True):
     wk = load_week(ref_date, nowcast=nowcast)
     groups = groups or built_groups()

@@ -128,7 +128,7 @@ def main(argv=None) -> int:
     p.add_argument("--reference-date", type=_date)
     p.add_argument("--groups", nargs="*")
     p.add_argument("--workers", type=int, default=4)
-    p.add_argument("--draws", type=int, default=200)
+    p.add_argument("--draws", type=int, default=300)
     p.add_argument("--keep", type=int, default=20)
     p.add_argument("--continuations", type=int, default=5)
     p.add_argument("--no-nowcast", action="store_true")

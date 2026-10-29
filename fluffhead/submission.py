@@ -5,8 +5,8 @@
    factor with correlation REGION_RHO) picks one per region per joint sample,
    so a bad season in one region tends to go with a bad season elsewhere.
 2. States. A state's sample is the sum of its pieces divided by the share of the
-   state's population they cover: the unsimulated remainder is assumed to have
-   the simulated part's per-capita rate. States in SCALED_STATES (Puerto Rico)
+   state's flu activity they carry (ED-weighted population share, as in the
+   targets): the unsimulated remainder is assumed to follow the simulated part. States in SCALED_STATES (Puerto Rico)
    take another group's per-capita curve, levelled to their own recent reports.
 3. Observation noise (negative binomial) on each state-week, then US = sum of
    the jurisdictions.
@@ -59,7 +59,7 @@ def joint_samples(weekly: dict[str, np.ndarray], window: np.ndarray, rng, n: int
     return picks
 
 
-def state_samples(weekly: dict, pieces: dict, shares: dict, picks: dict, observed: pd.DataFrame,
+def state_samples(weekly: dict, pieces: dict, shares: dict, act_shares: dict, picks: dict, observed: pd.DataFrame,
                   weeks: pd.DatetimeIndex, locations: pd.DataFrame, cutoff: dt.date, rng) -> dict[str, np.ndarray]:
     """{state FIPS: [samples, weeks]} expected admissions (no observation noise yet)."""
     n = len(next(iter(picks.values())))
@@ -68,7 +68,7 @@ def state_samples(weekly: dict, pieces: dict, shares: dict, picks: dict, observe
         sel = w[picks[g]]                                  # [samples, weeks, pieces]
         for k, s in enumerate(pieces[g]):
             tot[s] = tot.get(s, 0) + sel[:, :, k]
-            cov[s] = cov.get(s, 0) + shares[g][k]
+            cov[s] = cov.get(s, 0) + act_shares[g][k]
     out = {s: tot[s] / cov[s] for s in tot}
     log.info("state coverage: %s", ", ".join(f"{s} {cov[s]:.0%}" for s in sorted(cov) if cov[s] < 0.5))
 

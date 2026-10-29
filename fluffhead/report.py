@@ -29,6 +29,7 @@ TEMPLATE = Path(__file__).with_name("report_template.html")
 LEVELS = [0.025, 0.25, 0.5, 0.75, 0.975]
 PARAMS = ["beta_scale", "immune_scale", "import_scale", "season_amplitude"]
 MIN_ESS = 5.0
+MIN_PHI = 0.5     # below this the likelihood was tempered hard: the model can't follow the data closely
 
 
 def _iso(ts) -> str:
@@ -73,7 +74,7 @@ def _regions(region_dir: Path, weeks: pd.DatetimeIndex) -> list[dict]:
             for c in [c for c in draws if c.startswith("mult_")]:
                 params[c] = [_r(v, 2) for v in _wq(draws[c].to_numpy(), w, [0.05, 0.5, 0.95])]
             q = np.quantile(W, LEVELS, axis=0)
-            rec.update(ess=_r(meta["ess"]), mode=meta["mode"], n=meta["n"], params=params,
+            rec.update(ess=_r(meta["ess"]), phi=_r(meta.get("phi", 1.0), 2), mode=meta["mode"], n=meta["n"], params=params,
                        observed=[_r(v) for v in obs], bands={str(l): [_r(v) for v in q[i]] for i, l in enumerate(LEVELS)})
         out.append(rec)
     return out
@@ -97,6 +98,13 @@ def build_data(wk, df: pd.DataFrame, noisy: dict, weeks: pd.DatetimeIndex, probl
         if r.get("ess") is not None and r["ess"] < MIN_ESS:
             checks.append({"level": "warning", "text": f"{r['name']}: effective sample size {r['ess']:.1f} — the fit "
                                                         "rests on very few draws; consider more draws"})
+        if r.get("phi") is not None and r["phi"] < MIN_PHI:
+            checks.append({"level": "warning", "text": f"{r['name']}: likelihood tempered to phi {r['phi']:.2f} — no "
+                                                        "draw follows the data closely; the forecast is widened to compensate"})
+        for k, v in (r.get("params") or {}).items():
+            if k.startswith("mult_") and v[1] is not None and not 0.4 <= v[1] <= 2.5:
+                checks.append({"level": "info", "text": f"{r['name']}: admission multiplier for state {k[5:]} is "
+                                                        f"{v[1]:.2f} (prior median 1)"})
     absent = sorted(set(locs.index) - set(noisy))
     if absent:
         checks.append({"level": "warning", "text": "No forecast for " + ", ".join(locs.loc[a, "location_name"] for a in absent)})
@@ -106,7 +114,9 @@ def build_data(wk, df: pd.DataFrame, noisy: dict, weeks: pd.DatetimeIndex, probl
                                                 f"reported {r.reported:.0f} → {r['median']:.0f}"})
 
     from .regions import coverage
-    cov = coverage()
+    counties = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str, "state": str}, keep_default_na=False)
+    built_groups = {r["group"] for r in regions if r["built"]}
+    cov = coverage(counties.assign(group=counties.group.where(counties.group.isin(built_groups), "")))
     hub = df[(df.target == C.HOSP_TARGET) & (df.output_type == "quantile")]
     loc_data, table = [], []
     for loc, x in noisy.items():
