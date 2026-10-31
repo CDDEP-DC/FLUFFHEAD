@@ -140,3 +140,35 @@ def test_rate_change_categories():
     assert np.allclose(p, 0.2)
     p = rate_change_pmf(np.array([5, -5]), stable=2, large=3)    # small counts are always stable
     assert p[2] == 1
+
+
+def test_imports_follow_weights(net):
+    p = DiseaseParams()
+    p.beta_scale = 0.0
+    days = 30
+    w = np.zeros(net.n)
+    w[:100] = 1.0
+    w[100:110] = 5.0
+    imm = E.Immunity(np.zeros(net.n, bool), np.full(net.n, -1, np.int16))
+    sim = E.Simulation(net, p, np.ones((E.N_ROWS, days)), dt.date(2026, 8, 1), imm, np.full(days, 0.01), w, seed=3)
+    sim.run_to(days)
+    inf = sim.infections()
+    assert len(inf) > 20 and (inf.person < 110).all() and (inf.layer == "import").all()
+
+
+def test_community_multiplier(net):
+    def community(mult):
+        p = DiseaseParams()
+        p.beta_scale = 2.0
+        p.prior_immune[:] = 0
+        days = 60
+        imp = np.zeros(days)
+        imp[:5] = 10 / net.n / 5
+        imm = E.Immunity(np.zeros(net.n, bool), np.full(net.n, -1, np.int16))
+        sim = E.Simulation(net, p, np.ones((E.N_ROWS, days)), dt.date(2026, 8, 1), imm, imp, seed=5,
+                           community_mult=np.full(5, mult))
+        sim.run_to(days)
+        inf = sim.infections()
+        return inf.layer.str.startswith("community").sum()
+    # tract encounters stop; only the region-wide share (multiplier 1) remains
+    assert community(0.0) < 0.2 * community(1.0)

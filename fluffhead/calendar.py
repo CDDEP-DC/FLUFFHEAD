@@ -7,8 +7,9 @@ import). The engine thins transmission events by these values.
 School terms are approximate: districts differ, so states are grouped by when
 schools usually start (early August in much of the South and West, late
 August, or after Labor Day). Breaks: Thanksgiving Wednesday-Friday, winter
-break, one spring week, summer. Seasonality is a cosine in day of year,
-peaking at SEASON_PEAK_DOY, standing in for the effect of absolute humidity.
+break, one spring week, summer. Seasonality is a daily transmissibility factor
+from absolute humidity (weather.factor) when one is given, else a cosine in day
+of year peaking at SEASON_PEAK_DOY.
 """
 from __future__ import annotations
 
@@ -80,7 +81,9 @@ def seasonality(day: dt.date, amplitude: float) -> float:
     return (1 + amplitude * np.cos(2 * np.pi * (doy - SEASON_PEAK_DOY) / 365.25)) / (1 + amplitude)
 
 
-def build(start: dt.date, days: int, state: str, season_amplitude: float = 0.2) -> np.ndarray:
+def build(start: dt.date, days: int, state: str, season_amplitude: float = 0.2,
+          season: np.ndarray | None = None) -> np.ndarray:
+    """`season`, if given, is the daily seasonal factor in (0, 1] (else the cosine with `season_amplitude`)."""
     cal = np.ones((N_ROWS, days))
     for i in range(days):
         d = start + dt.timedelta(days=i)
@@ -95,7 +98,7 @@ def build(start: dt.date, days: int, state: str, season_amplitude: float = 0.2) 
         cal[WP, i] = work
         cal[COMM_WORK, i] = work
         cal[SCH, i] = 1.0 if school_open(d, state) else 0.0
-        f = seasonality(d, season_amplitude)
+        f = season[i] if season is not None else seasonality(d, season_amplitude)
         for row in (HH, WP, SCH, GQ, COMM, COMM_WORK):
             cal[row, i] *= f
     cal[IMPORT] = 1.0

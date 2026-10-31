@@ -27,7 +27,7 @@ from . import config as C
 log = logging.getLogger(__name__)
 TEMPLATE = Path(__file__).with_name("report_template.html")
 LEVELS = [0.025, 0.25, 0.5, 0.75, 0.975]
-PARAMS = ["beta_scale", "immune_scale", "import_scale", "season_amplitude"]
+PARAMS = ["r_now", "immune_scale", "travel_share", "humidity_floor", "beta_scale"]
 MIN_ESS = 5.0
 MIN_PHI = 0.5     # below this the likelihood was tempered hard: the model can't follow the data closely
 
@@ -70,7 +70,7 @@ def _regions(region_dir: Path, weeks: pd.DatetimeIndex) -> list[dict]:
             obs = pd.Series(np.nansum(z["observed"], 1), index=obs_w).reindex(weeks)
             draws = pd.read_csv(region_dir / f"{g}-draws.csv")
             w = draws.weight.to_numpy()
-            params = {p: [_r(v, 3) for v in _wq(draws[p].to_numpy(), w, [0.05, 0.5, 0.95])] for p in PARAMS}
+            params = {p: [_r(v, 3) for v in _wq(draws[p].to_numpy(), w, [0.05, 0.5, 0.95])] for p in PARAMS if p in draws}
             for c in [c for c in draws if c.startswith("mult_")]:
                 params[c] = [_r(v, 2) for v in _wq(draws[c].to_numpy(), w, [0.05, 0.5, 0.95])]
             q = np.quantile(W, LEVELS, axis=0)

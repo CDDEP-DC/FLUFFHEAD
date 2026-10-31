@@ -50,6 +50,7 @@ class DiseaseParams:
     community_rate: float = 4.0        # tract encounters per infectious day
     community_global_share: float = 0.05   # of encounters drawn from the whole region, not the tract
     community_work_share: float = 0.4      # of tract encounters at the work tract (workers on weekdays)
+    community_density_gamma: float = 0.15  # tract encounter rate ~ density^gamma, mean 1 within a region (exposure.py)
     # after symptom onset, relative contact by layer (staying home); household unchanged
     sym_contact: np.ndarray = field(default_factory=lambda: np.array([1.0, 0.5, 0.3, 1.0, 0.5]))
 

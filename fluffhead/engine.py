@@ -5,7 +5,9 @@ disease course is drawn when they are infected. What changes is where onward
 infections go: instead of a Poisson number of anonymous contacts, each of the
 agent's actual contacts gets candidate transmission events at the layer's hazard
 over each infectious segment of the timeline (presymptomatic, symptomatic,
-asymptomatic). Community contacts are drawn from the tract's residents and workers.
+asymptomatic). Community contacts are drawn from the tract's residents and workers,
+at a rate scaled by the tract's density multiplier. Importations pick people in
+proportion to their importation weight (exposure.py).
 
 Time-varying effects (weekends, school calendars, seasonality) and the target's
 susceptibility (prior immunity, vaccination) are applied when an event fires, by
@@ -115,25 +117,24 @@ def _seed(s):
 
 @nb.njit(cache=True)
 def _run(day0, day1,
-         age_group, home_tract, work_tract, tract_ptr, tract_mem, res_idx, outw_idx,
+         age_group, home_tract, work_tract, tract_ptr, tract_mem, comm_mult, imp_cum,
          gp, gm, gb, pp, ps, go,
          starts, pool, used, budget, kinds, Ks, assocs, betas_sw, net_seed,
          prior_imm, vacc_day,
          sc, sym_mean, asym_frac, hosp_p, beta, sym_contact,
-         cal, imp_res, imp_out,
+         cal, imp,
          t_inf, ht, hj, hs, hl, hn,
          r_j, r_t, r_src, r_L, r_sym, r_on, r_adm, r_vac, rn):
     n = len(t_inf)
     T = cal.shape[1]
+    cmax = max(comm_mult.max(), 1.0) if len(comm_mult) > 0 else 1.0
     for d in range(day0, day1):
-        # importations: Poisson counts per day, uniform times within the day
-        if len(res_idx) > 0:
-            for _ in range(np.random.poisson(imp_res[d] * len(res_idx))):
-                k = res_idx[np.random.randint(len(res_idx))]
-                ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, d + np.random.random(), k, -1, IMPORT)
-        if len(outw_idx) > 0:
-            for _ in range(np.random.poisson(imp_out[d] * len(outw_idx))):
-                k = outw_idx[np.random.randint(len(outw_idx))]
+        # importations: Poisson count per day (hazard per unit weight x total weight), people picked
+        # in proportion to their weight, uniform times within the day
+        W = imp_cum[n - 1] if n > 0 else 0.0
+        if W > 0:
+            for _ in range(np.random.poisson(imp[d] * W)):
+                k = min(np.searchsorted(imp_cum, np.random.random() * W, side="right"), n - 1)
                 ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, d + np.random.random(), k, -1, IMPORT)
 
         while hn > 0 and ht[0] < d + 1:
@@ -220,19 +221,22 @@ def _run(day0, day1,
                                 for _ in range(np.random.poisson(lam)):
                                     ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, seg_a[s] + np.random.random() * D, c, k, Lc)
 
-                # community encounters that transmit (thinned Poisson), at home or work tract
+                # community encounters that transmit (thinned Poisson), at home or work tract; drawn
+                # at the highest tract multiplier and kept with probability multiplier / highest
                 m = sym_contact[COMM] if seg_sym[s] else 1.0
-                for _ in range(np.random.poisson(sc[S_COMM_RATE] * D * m * beta[COMM] * seg_rel[s])):
+                for _ in range(np.random.poisson(sc[S_COMM_RATE] * cmax * D * m * beta[COMM] * seg_rel[s])):
                     tt = seg_a[s] + np.random.random() * D
                     row = COMM
                     if np.random.random() < sc[S_COMM_GLOBAL]:
+                        if np.random.random() * cmax >= 1.0:
+                            continue
                         c = np.random.randint(n)
                     else:
                         tr = home_tract[k]
                         if work_tract[k] >= 0 and (tr < 0 or np.random.random() < sc[S_COMM_WORK]):
                             tr = work_tract[k]
                             row = COMM_WORK
-                        if tr < 0:
+                        if tr < 0 or np.random.random() * cmax >= comm_mult[tr]:
                             continue
                         c = tract_mem[tract_ptr[tr] + np.random.randint(tract_ptr[tr + 1] - tract_ptr[tr])]
                     if c != k and t_inf[c] == INF:
@@ -252,15 +256,20 @@ class Simulation:
     """One stochastic run over one region, advanced a day range at a time."""
 
     def __init__(self, net: Network, params: DiseaseParams, calendar: np.ndarray, start: dt.date,
-                 immunity: Immunity, import_res: np.ndarray, import_out: np.ndarray | None = None,
+                 immunity: Immunity, imports: np.ndarray, import_weight: np.ndarray | None = None,
                  mode: str = "full", net_seed: int = 1, seed: int = 1, pool: EdgePool | None = None,
-                 lazy_budget_bytes: int = 2 << 30):
+                 lazy_budget_bytes: int = 2 << 30, community_mult: np.ndarray | None = None):
+        """`imports`: daily importation hazard per unit of `import_weight` (default weight 1 for
+        residents, 0 otherwise); `community_mult`: per-tract community rate multiplier (default 1)."""
         params.check()
         self.net, self.params, self.start = net, params, start
         self.cal = np.ascontiguousarray(calendar, np.float64)
         assert self.cal.shape[0] == N_ROWS
-        self.imp_res = np.asarray(import_res, np.float64)
-        self.imp_out = np.asarray(import_out if import_out is not None else import_res, np.float64)
+        self.imp = np.asarray(imports, np.float64)
+        w = net.resident.astype(np.float64) if import_weight is None else np.asarray(import_weight, np.float64)
+        self.imp_cum = np.cumsum(w)
+        self.comm_mult = (np.ones(net.n_tracts) if community_mult is None
+                          else np.ascontiguousarray(community_mult, np.float64))
         self.imm = immunity
         self.pool = pool or EdgePool.create(net, mode, net_seed, lazy_budget_bytes)
         self.day = 0
@@ -271,8 +280,6 @@ class Simulation:
                     np.empty(1 << 14, np.int8), np.empty(1 << 14, np.bool_), np.empty(1 << 14),
                     np.empty(1 << 14), np.empty(1 << 14, np.bool_)]
         self.rn = 0
-        self.res_idx = np.flatnonzero(net.resident).astype(np.int32)
-        self.outw_idx = np.flatnonzero(net.out_worker).astype(np.int32)
         rules = [layer_rule(net, L) if L in EDGE_LAYERS else (0, 0, 0.0, 0.0) for L in range(4)]
         self.kinds = np.array([r[0] for r in rules], np.int64)
         self.Ks = np.array([r[1] for r in rules], np.int64)
@@ -293,11 +300,11 @@ class Simulation:
         budget = ep.budget if ep.mode == "lazy" else np.iinfo(np.int64).max
         out = _run(self.day, day,
                    net.age_group, net.home_tract, net.work_tract, net.tract_ptr, net.tract_mem,
-                   self.res_idx, self.outw_idx,
+                   self.comm_mult, self.imp_cum,
                    tuple(net.grp_ptr), tuple(net.grp_mem), tuple(net.grp_blk), tuple(net.per_ptr), tuple(net.per_slot), tuple(net.grp_of),
                    tuple(ep.start), ep.pool, ep.used, budget, self.kinds, self.Ks, self.assocs, self.betas_sw,
                    ep.net_seed, imm.prior_immune, imm.vacc_day,
-                   *packed, self.cal, self.imp_res, self.imp_out,
+                   *packed, self.cal, self.imp,
                    self.t_inf, *self.heap, *self.rec, self.rn)
         ep.pool, ep.used = out[0], out[1]
         self.heap = out[2:7]

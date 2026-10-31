@@ -61,6 +61,7 @@ class Network:
     tract_ptr: np.ndarray        # int64 [n_tracts+1] over tract_mem (residents then workers)
     tract_mem: np.ndarray        # int32
     params: dict                 # GREASYPOP network settings (K, associativity, beta)
+    tracts: np.ndarray | None = None   # tract GEOIDs (2010) indexed by home/work tract
 
     @property
     def n_tracts(self) -> int:
@@ -149,7 +150,8 @@ def load(group: str, regions_dir: Path = C.REGIONS_DIR) -> Network:
                    grp_ptr=gp, grp_mem=gm, grp_blk=gb, per_ptr=pp, per_slot=ps, grp_of=go,
                    home_tract=z["home_tract"], work_tract=z["work_tract"],
                    tract_ptr=z["tract_ptr"], tract_mem=z["tract_mem"],
-                   params=json.loads((d / "params.json").read_text()))
+                   params=json.loads((d / "params.json").read_text()),
+                   tracts=z["tracts"] if "tracts" in z else None)
 
 
 # ------------------------------------------------------ edge generation (numba)

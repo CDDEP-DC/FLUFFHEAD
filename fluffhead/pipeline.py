@@ -30,6 +30,7 @@ from . import hub_data as D
 from . import network as N
 from . import nowcast as nc
 from . import submission as S
+from . import weather as W
 
 log = logging.getLogger(__name__)
 RUNS_DIR = C.REPO / "runs"
@@ -171,6 +172,7 @@ def run(ref_date: dt.date, groups: list[str] | None = None, workers: int = 4, n_
         n_keep: int = 20, n_cont: int = 5, nowcast: bool = True):
     wk = load_week(ref_date, nowcast=nowcast)
     groups = groups or built_groups()
+    W.prefetch(groups)     # station downloads once, before workers share the cache
     region_dir = run_regions(wk, groups, workers, n_draws, n_keep, n_cont)
     df, noisy, weeks, problems, absent = combine(wk, region_dir)
     path = S.save(df, ref_date)

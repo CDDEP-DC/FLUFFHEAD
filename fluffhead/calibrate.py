@@ -15,6 +15,21 @@ epidemic is the wrong size can't be rescued by a large multiplier. A constant
 background (sporadic admissions outside the seasonal epidemic, the mean of the
 piece's first BASELINE_WEEKS weeks of the season) is added on top.
 
+Parameters. Four are fitted, each with a prior on an interpretable scale:
+  r_now           effective reproduction number at the cutoff (current contacts,
+                  vaccination, prior immunity, humidity). Each region measures how R
+                  depends on transmissibility and immunity in a few short seeded runs
+                  (RMap); a draw's beta_scale is solved from its r_now.
+  immune_scale    multiplies the age-specific prior immunity.
+  travel_share    iota in exposure.py: the average resident's share of infection risk met
+                  outside the region (travel, visitors), applied to national incidence and
+                  spread over people by their exposure (airport traffic, age, visitor-facing
+                  work); commuters across the region boundary add a fixed share on top.
+                  One tight prior for all regions.
+  humidity_floor  rho in weather.factor: transmissibility at very high humidity relative
+                  to dry air (Shaman et al. 2010 best fits: R0min/R0max ~0.26-0.5). It
+                  sets how much R changes as humidity changes after the cutoff.
+
 Fitting (adaptive importance sampling). Round 1 draws from the prior; each later
 round draws from a Gaussian fitted to the weighted draws so far (in a transformed
 space where every prior is unbounded), mixed with the prior. All draws are pooled
@@ -39,7 +54,9 @@ from scipy import special, stats
 from . import calendar as K
 from . import config as C
 from . import ed as ED
+from . import exposure as X
 from . import immunity as I
+from . import weather as W
 from .disease import DiseaseParams
 from .engine import Simulation
 from .network import N_AGE, EdgePool, Network, choose_mode
@@ -55,22 +72,27 @@ PROPOSAL_INFLATE = 2.0          # proposal covariance = this x weighted covarian
 MIN_ESS = 20.0                  # temper the likelihood until the effective sample size reaches this
 BASELINE_WEEKS = 4              # weeks at the season start (August) that set each piece's background admissions
 HALF_LIFE_WEEKS = 4.0           # weekly likelihood terms are down-weighted with this half-life back from the cutoff
-INFECTIONS_PER_ADMISSION = 150  # converts national admissions per capita to infection pressure
-TRAVEL_SHARE = 0.02             # share of that pressure a resident meets from outside the region
+INFECTIONS_PER_ADMISSION = 150  # converts national admissions per capita to infection incidence
+R_GRID_X = (1.25, 2.0, 3.0, 4.5, 6.5)   # RMap: beta_scale x seasonal factor
+R_GRID_IMMUNE = (0.5, 1.0, 1.5)         # RMap: immune_scale
+R_RUN_DAYS = 21                 # RMap runs: seeded at the cutoff, run this long
+R_COHORT_DAYS = 7               # RMap: R = offspring per first-generation case infected in this window
+NOW_DAYS = 7                    # humidity at the cutoff: mean seasonal factor over this many days
+FALLBACK_AMPLITUDE = 0.2        # cosine seasonality when no humidity data
 
 
 @dataclass
 class Prior:
     """Uniform (or log-uniform) priors on the calibrated parameters."""
-    beta_scale: tuple = (1.5, 4.5)
+    r_now: tuple = (0.8, 1.5)               # seasonal influenza R ~1.2-1.4 in growth (Biggerstaff 2014)
     immune_scale: tuple = (0.5, 1.5)        # multiplies DiseaseParams.prior_immune
-    import_scale: tuple = (0.25, 64.0)      # log-uniform; multiplies the national import pressure
-    season_amplitude: tuple = (0.1, 0.35)
-    log_scale: tuple = ("import_scale",)
+    travel_share: tuple = (0.01, 0.04)      # log-uniform
+    humidity_floor: tuple = (0.25, 0.6)
+    log_scale: tuple = ("travel_share",)
 
     @property
     def names(self) -> list[str]:
-        return ["beta_scale", "immune_scale", "import_scale", "season_amplitude"]
+        return ["r_now", "immune_scale", "travel_share", "humidity_floor"]
 
     def _bounds(self, k):
         lo, hi = getattr(self, k)
@@ -119,6 +141,12 @@ class Region:
     pool: EdgePool
     base: DiseaseParams = field(default_factory=DiseaseParams)
     activity_share: pd.DataFrame | None = None   # [season weeks, pieces] share of state flu activity
+    humidity: W.Humidity | None = None           # daily specific humidity
+    import_travel: np.ndarray | None = None      # per-person importation weights (exposure.py)
+    import_commute: np.ndarray | None = None
+    community_mult: np.ndarray | None = None     # per-tract community rate multiplier
+    cutoff: dt.date | None = None
+    r_map: RMap | None = None
 
     def shares_for(self, dates) -> np.ndarray:
         if self.activity_share is None:
@@ -166,8 +194,24 @@ def setup(group: str, net: Network, ref_date: dt.date, horizon_end: dt.date, loc
                                                  pieces, weeks, np.array(share)), index=weeks, columns=pieces)
         log.info("%s: share of state flu activity (ED-weighted / population): %s", group,
                  ", ".join(f"{s} {a:.3f}/{p:.3f}" for s, a, p in zip(pieces, act_share.iloc[-1], share)))
+    try:
+        humidity = W.region_humidity(group, start, days)
+    except Exception as e:      # no weather: cosine seasonality
+        log.warning("%s: humidity unavailable (%s); cosine seasonality", group, e)
+        humidity = None
+    base = DiseaseParams()
+    try:
+        travel, commute = X.import_weights(group, net)
+        cmult = X.community_multiplier(net, base.community_density_gamma)
+        size = np.diff(net.tract_ptr)
+        log.info("%s: community density multiplier: 10/50/90%% of people %s", group,
+                 np.round(np.quantile(np.repeat(cmult, size), [0.1, 0.5, 0.9]), 2))
+    except Exception as e:      # missing exposure data: uniform importation and contact
+        log.warning("%s: exposure data unavailable (%s); uniform importation and community contact", group, e)
+        travel, commute, cmult = net.resident.astype(float), np.zeros(net.n), None
     return Region(group, net, start, days, main, pieces, piece_of, np.array(scale), np.array(share),
-                  EdgePool.create(net, mode, net_seed), activity_share=act_share)
+                  EdgePool.create(net, mode, net_seed), base=base, activity_share=act_share, humidity=humidity,
+                  cutoff=ref_date, import_travel=travel, import_commute=commute, community_mult=cmult)
 
 
 def targets(region: Region, observed: pd.DataFrame, cutoff: dt.date) -> pd.DataFrame:
@@ -179,28 +223,108 @@ def targets(region: Region, observed: pd.DataFrame, cutoff: dt.date) -> pd.DataF
 
 
 def import_pressure(region: Region, national: pd.Series, cutoff: dt.date) -> np.ndarray:
-    """Per-person daily import hazard (before import_scale), from national admissions per capita."""
+    """National infections per capita per day (before travel_share), from admissions per capita."""
     days = pd.date_range(region.start, periods=region.days)
     weekly = national.sort_index()
     daily = weekly.reindex(weekly.index.union(days)).interpolate().bfill().ffill().reindex(days)
     daily[days > pd.Timestamp(cutoff)] = daily[days <= pd.Timestamp(cutoff)].iloc[-1]   # held after the cutoff
-    return (daily.to_numpy() / 7) * INFECTIONS_PER_ADMISSION * TRAVEL_SHARE
+    return (daily.to_numpy() / 7) * INFECTIONS_PER_ADMISSION
+
+
+# ------------------------------------------------------------ R and season
+def season(region: Region, rho: float, q: np.ndarray | None = None) -> np.ndarray:
+    """Daily seasonal factor in (0, 1] from humidity (`q`, else the region's central path)."""
+    if region.humidity is None:
+        return np.array([K.seasonality(region.start + dt.timedelta(days=i), FALLBACK_AMPLITUDE)
+                         for i in range(region.days)])
+    return W.factor(region.humidity.path() if q is None else q, rho)
+
+
+def season_now(region: Region, rho: float) -> float:
+    """Mean seasonal factor over the NOW_DAYS days to the cutoff."""
+    d = (region.cutoff - region.start).days
+    return float(season(region, rho)[max(d - NOW_DAYS + 1, 0):d + 1].mean())
+
+
+def _extrap(x0: float, xs: np.ndarray, ys: np.ndarray) -> float:
+    """Linear interpolation, extended linearly past the ends."""
+    if x0 <= xs[0]:
+        return ys[0] + (x0 - xs[0]) * (ys[1] - ys[0]) / (xs[1] - xs[0])
+    if x0 >= xs[-1]:
+        return ys[-1] + (x0 - xs[-1]) * (ys[-1] - ys[-2]) / (xs[-1] - xs[-2])
+    return float(np.interp(x0, xs, ys))
+
+
+@dataclass
+class RMap:
+    """Measured effective R at the cutoff on a grid of transmissibility x (beta_scale times the
+    seasonal factor) and immune_scale; inverted in log-log space."""
+    x: np.ndarray
+    immune: np.ndarray
+    r: np.ndarray                # [immune, x]
+
+    def x_for(self, r: float, immune: float) -> float:
+        lx = np.log(self.x)
+        per = []
+        for row in self.r:
+            lr = np.log(np.maximum.accumulate(np.maximum(row, 0.05)) + 1e-9 * np.arange(len(row)))
+            per.append(_extrap(np.log(r), lr, lx))
+        return float(np.exp(_extrap(immune, self.immune, np.array(per))))
+
+
+def _measure_r(region: Region, x: float, imm, p_imm: np.ndarray, d0: int, seed: int) -> float:
+    p = replace(region.base)
+    p.beta_scale = x
+    p.prior_immune = p_imm
+    days = d0 + R_RUN_DAYS
+    cal = K.build(region.start, days, region.main_state, season=np.ones(days))
+    n_seed = int(np.clip(region.net.n / 2000, 200, 1000))
+    imp = np.zeros(days)
+    imp[d0] = n_seed / max(region.net.resident.sum(), 1)    # seeds: residents at random
+    sim = Simulation(region.net, p, cal, region.start, imm, imp, pool=region.pool, seed=seed,
+                     community_mult=region.community_mult)
+    sim.run_to(days)
+    j, t, src = (a[:sim.rn] for a in sim.rec[:3])
+    first = j[np.isin(src, j[src < 0]) & (t < d0 + R_COHORT_DAYS)]
+    return float(np.isin(src, first).sum() / max(len(first), 1))
+
+
+def r_map(region: Region, seed: int = 1) -> RMap:
+    d0 = (region.cutoff - region.start).days + 1
+    r = np.zeros((len(R_GRID_IMMUNE), len(R_GRID_X)))
+    for a, s in enumerate(R_GRID_IMMUNE):
+        p_imm = np.clip(region.base.prior_immune * s, 0, 0.9)
+        imm = I.build(region.net, p_imm, region.start, region.start.year, region.main_state, seed + a)
+        for b, x in enumerate(R_GRID_X):
+            r[a, b] = _measure_r(region, x, imm, p_imm, d0, seed + 10 * a + b)
+    log.info("%s: R at the cutoff by immune_scale (rows %s) and beta x season (%s):\n%s", region.group,
+             R_GRID_IMMUNE, R_GRID_X, np.array2string(r, precision=2))
+    return RMap(np.array(R_GRID_X), np.array(R_GRID_IMMUNE), r)
 
 
 # --------------------------------------------------------------- one run
+def beta_scale(region: Region, theta) -> float:
+    """The beta_scale that gives the draw's r_now at the cutoff, given its immunity and humidity floor."""
+    x = region.r_map.x_for(float(theta.r_now), float(theta.immune_scale))
+    return x / season_now(region, float(theta.humidity_floor))
+
+
 def params_for(region: Region, theta) -> DiseaseParams:
     p = replace(region.base)
-    p.beta_scale = float(theta.beta_scale)
+    p.beta_scale = beta_scale(region, theta)
     p.prior_immune = np.clip(region.base.prior_immune * theta.immune_scale, 0, 0.9)
     return p
 
 
-def make_sim(region: Region, theta, pressure: np.ndarray, seed: int) -> Simulation:
+def make_sim(region: Region, theta, pressure: np.ndarray, seed: int, q: np.ndarray | None = None) -> Simulation:
+    """A run for draw `theta`; `q` is the humidity path (default: the region's central path)."""
     p = params_for(region, theta)
-    cal = K.build(region.start, region.days, region.main_state, float(theta.season_amplitude))
+    cal = K.build(region.start, region.days, region.main_state,
+                  season=season(region, float(theta.humidity_floor), q))
     imm = I.build(region.net, p.prior_immune, region.start, region.start.year, region.main_state, seed)
-    imp = pressure * float(theta.import_scale)
-    return Simulation(region.net, p, cal, region.start, imm, imp, pool=region.pool, seed=seed)
+    weight = float(theta.travel_share) * region.import_travel + region.import_commute
+    return Simulation(region.net, p, cal, region.start, imm, pressure, weight, pool=region.pool, seed=seed,
+                      community_mult=region.community_mult)
 
 
 def _delay_weights(p: DiseaseParams, max_days: int = 21) -> np.ndarray:
@@ -321,6 +445,8 @@ def fit(region: Region, observed: pd.DataFrame, national: pd.Series, cutoff: dt.
         n_rounds: int = N_ROUNDS) -> Fit:
     rng = np.random.default_rng(seed)
     prior = prior or Prior()
+    region.cutoff = cutoff
+    region.r_map = r_map(region, seed)
     tgt = targets(region, observed, cutoff)
     y = tgt.to_numpy()
     base = baseline(y)
@@ -360,12 +486,15 @@ def fit(region: Region, observed: pd.DataFrame, national: pd.Series, cutoff: dt.
         log.info("%s: round %d: ESS %.1f, phi %.3f", region.group, r + 1, 1 / (w**2).sum(), phi)
     th = allth
     th["weight"] = w
+    th["beta_scale"] = [beta_scale(region, t) for t in th.itertuples()]
     ess = float(1 / (w**2).sum())
     idx = rng.choice(len(th), n_keep, replace=True, p=w)
     kept = th.iloc[idx].reset_index(drop=True)
     log.info("%s: ESS %.1f of %d draws (phi %.3f); kept %d (%d distinct); multipliers %s", region.group, ess,
              n_draws, phi, n_keep, len(set(idx)),
              ", ".join(f"{s} {np.exp((w * np.log(th[f'mult_{s}'])).sum()):.2f}" for s in region.pieces))
+    log.info("%s: weighted means: %s", region.group,
+             ", ".join(f"{k} {(w * th[k]).sum():.3g}" for k in prior.names + ["beta_scale"]))
     log.info("%s: background admissions per week %s", region.group,
              ", ".join(f"{s} {b:.1f}" for s, b in zip(region.pieces, base)))
     return Fit(region.group, cutoff, th, kept, tgt.index, y, ess, phi, base)
@@ -381,7 +510,9 @@ def forecast(region: Region, fit_: Fit, national: pd.Series, n_cont: int = 5, se
     for i, t in enumerate(fit_.kept.itertuples()):
         mult = np.array([getattr(t, f"mult_{s}") for s in region.pieces])
         for c in range(n_cont):
-            sim = make_sim(region, t, pressure, int(t.seed))
+            # each continuation its own weather after the forecast (identical up to the cutoff)
+            q = region.humidity.path(rng) if region.humidity is not None else None
+            sim = make_sim(region, t, pressure, int(t.seed), q)
             sim.run_to(day_cut)
             sim.reseed(int(rng.integers(1, 2**31 - 1)))
             sim.run_to(region.days)
