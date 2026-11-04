@@ -109,6 +109,7 @@ BASELINE_WEEKS = 4              # weeks at the season start (August) that set ea
 HALF_LIFE_WEEKS = 4.0           # weekly likelihood terms are down-weighted with this half-life back from the cutoff
 GROWTH_WEEKS = 4                # growth term: log-linear slope of the region's admissions over the last weeks
 GROWTH_SD = 0.05                # its extra sd (per week, log scale) beyond count noise; ~ x1.05/week
+START_PSEUDO = 10.0             # start_correction: admissions added to both sides of the ratio, so small counts stay near 1
 IMPORT_STEP_DAYS = 7            # forecast: national import pressure updated from the run's own incidence this often
 IMPORT_MIN_REF = 20             # ...if the run had at least this many resident infections in the week to the cutoff
 INFECTIONS_PER_ADMISSION = 150  # converts national admissions per capita to infection incidence
@@ -819,6 +820,20 @@ def advance(region: Region, sim: Simulation, theta, pressure: np.ndarray, d1: in
         d = nxt
 
 
+def start_correction(daily: np.ndarray, y: np.ndarray, day_cut: int, bg: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Start the forecast from the data. Fits run 10% or so above the last week (the score weights
+    the whole recent curve), which would otherwise show as a jump from the nowcast to horizon 0.
+    Each piece's epidemic after the cutoff is scaled by data / median model in the cutoff week:
+    one factor for all trajectories, so their spread is kept. `daily` [traj, days, pieces], `y` the
+    cutoff week's target per piece, `bg` background per day. Returns (corrected, factors)."""
+    model = np.median(daily[:, day_cut - 7:day_cut].sum(1), axis=0)
+    y = np.where(np.isnan(y), model, y)
+    r = (y + START_PSEUDO) / (model + START_PSEUDO)
+    out = daily.copy()
+    out[:, day_cut:] = (out[:, day_cut:] - bg) * r + bg
+    return out, r
+
+
 def forecast(region: Region, fit_: Fit, national: pd.Series, n_cont: int = 5, seed: int = 2) -> dict:
     """Expected daily admissions per piece for each trajectory: {'daily': [traj, days, pieces], ...}."""
     rng = np.random.default_rng(seed)
@@ -851,7 +866,12 @@ def forecast(region: Region, fit_: Fit, national: pd.Series, n_cont: int = 5, se
     meta = [(i, c) for i, c, _, _ in jobs]
     vshare = [o[1] for o in out if o[1] is not None]
     vpar = [o[2] for o in out if o[2] is not None]
-    out = {"daily": np.stack(trajs), "dates": pd.date_range(region.start, periods=region.days),
+    daily = np.stack(trajs)
+    last = fit_.weeks == pd.Timestamp(fit_.cutoff)
+    if last.any():
+        daily, r = start_correction(daily, fit_.observed[last][-1], day_cut, bg)
+        log.info("%s: start correction by piece: %s", region.group, np.array2string(r, precision=2))
+    out = {"daily": daily, "dates": pd.date_range(region.start, periods=region.days),
            "pieces": region.pieces, "meta": meta}
     if vshare:
         out["variant_share"] = np.stack(vshare)

@@ -376,3 +376,22 @@ def test_largest_order_keeps_size_order():
     t.join(5)
     ex.shutdown()
     assert started[:2] == ["a", "b"] and sorted(started) == list("abcdef")
+
+
+def test_start_correction():
+    """The median trajectory starts at the data, spread and the past are kept, a missing week changes nothing."""
+    from fluffhead import calibrate as CB
+    days, cut = 40, 28
+    t = np.arange(days)[None, :, None] * 1.0
+    daily = np.concatenate([(t + 100) * k for k in (0.8, 1.0, 1.2)])          # [3 traj, days, 1 piece]
+    bg = np.array([2.0])
+    model = np.median(daily[:, cut - 7:cut].sum(1), axis=0)
+    y = model / 2
+    out, r = CB.start_correction(daily, y, cut, bg)
+    assert r == pytest.approx((y + CB.START_PSEUDO) / (model + CB.START_PSEUDO))
+    assert (out[:, :cut] == daily[:, :cut]).all()
+    x = (daily[:, cut:] - bg) * r + bg
+    assert out[:, cut:] == pytest.approx(x)
+    assert (out[2, cut:] - bg) / (out[0, cut:] - bg) == pytest.approx((daily[2, cut:] - bg) / (daily[0, cut:] - bg))
+    same, r = CB.start_correction(daily, np.array([np.nan]), cut, bg)
+    assert r == pytest.approx(1.0) and same == pytest.approx(daily)
