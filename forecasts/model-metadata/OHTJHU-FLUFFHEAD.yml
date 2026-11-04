@@ -10,7 +10,7 @@ model_contributors: [
     "email": "eklein@jhu.edu"
   }
 ]
-website_url: "TODO"
+website_url: "https://github.com/CDDEP-DC/FLUFFHEAD"
 license: "CC-BY-4.0"
 designated_model: false
 data_inputs: "NHSN confirmed influenza hospital admissions (FluSight target data, with past versions used to model revisions); NSSP influenza emergency department visits by health service area; California and Pennsylvania state health department data; CDC influenza vaccination coverage by state, age and month (2025-26 until 2026-27 data are available); absolute humidity from IEM ASOS station dew points and the NWS 7-day forecast; air travel, commuting and workplace data for importation (FAA enplanements, LODES); synthetic populations built with GREASYPOP-CO."
