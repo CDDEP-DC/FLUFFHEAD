@@ -8,6 +8,9 @@ Setup (once, or when region rules change):
 Weekly:
     fluffhead forecast       nowcast, fit and forecast every built group, write the submission
     fluffhead report         re-render a week's review report from its saved data
+
+Calibration:
+    fluffhead hindcast       fit past seasons per region; sets the immunity prior (hindcast.py)
 """
 from __future__ import annotations
 
@@ -91,13 +94,28 @@ def cmd_networks(args) -> int:
 def cmd_forecast(args) -> int:
     from . import pipeline as P
     ref = args.reference_date or P.reference_date_for(dt.date.today())
+    from . import strains as ST
+    sc = ST.Scenario(subtype=args.subtype, strains=args.strains, origin=args.variant_origin,
+                     variant_share=args.variant_share, variant_share_date=args.variant_share_date,
+                     share_groups=tuple(args.variant_share_regions.split(",")) if args.variant_share_regions else (),
+                     mechanism=args.variant_mechanism)
     wk, df, noisy, weeks, problems, path = P.run(ref, groups=args.groups, workers=args.workers,
                                                  n_draws=args.draws, n_keep=args.keep, n_cont=args.continuations,
-                                                 nowcast=not args.no_nowcast)
+                                                 nowcast=not args.no_nowcast, scenario=sc, two_pass=not args.one_pass,
+                                                 draw_workers=args.draw_workers, order=args.order)
     print(f"submission: {path}")
     for p in problems:
         print("PROBLEM:", p)
     return 1 if problems else 0
+
+
+def cmd_hindcast(args) -> int:
+    from . import hindcast as H
+    from . import pipeline as P
+    H.run_all(args.groups or P.built_groups(), args.seasons, args.workers, args.draws)
+    t = H.summary(args.seasons)
+    print(t.groupby("season")[["ess", "phi", "immune_mean", "immune_sd"]].describe().T.round(2).to_string())
+    return 0
 
 
 def cmd_report(args) -> int:
@@ -131,8 +149,37 @@ def main(argv=None) -> int:
     p.add_argument("--draws", type=int, default=300)
     p.add_argument("--keep", type=int, default=20)
     p.add_argument("--continuations", type=int, default=5)
+    p.add_argument("--draw-workers", type=int, default=1,
+                   help="processes per region for its runs (fit draws, forecast trajectories); the variant's "
+                        "origin runs alone first with workers x draw-workers. On a large machine, e.g. "
+                        "--workers 12 --draw-workers 16 for 192 cores")
+    p.add_argument("--order", choices=["largest", "barbell"], default="largest",
+                   help="largest: each worker takes the largest region left. barbell (small machines): the "
+                        "largest region runs alone, then one worker works down from the next largest and "
+                        "the others up from the smallest")
+    p.add_argument("--one-pass", action="store_true",
+                   help="skip pass 2 (imports after the cutoff then follow each region's own incidence)")
     p.add_argument("--no-nowcast", action="store_true")
+    p.add_argument("--subtype", choices=["H1N1", "H3N2"], default="H1N1",
+                   help="dominant subtype; H3N2 raises admissions per case, mostly in older adults")
+    p.add_argument("--strains", type=int, choices=[1, 2], default=1,
+                   help="1: the dominant strain only; 2: plus a variant of it (strains.py)")
+    p.add_argument("--variant-origin", default="everywhere",
+                   help="group where the variant starts (e.g. csa348, Los Angeles), or 'everywhere'")
+    p.add_argument("--variant-share", type=float,
+                   help="reported share of characterized viruses that are the variant (e.g. 0.03)")
+    p.add_argument("--variant-share-date", type=_date, help="date of --variant-share")
+    p.add_argument("--variant-mechanism", default="mixed", choices=["mixed", "escape", "fitness", "young"],
+                   help="how the variant gains (strains.MECHANISMS): fitted ranges or fixed values")
+    p.add_argument("--variant-share-regions",
+                   help="comma-separated groups --variant-share applies to (default: where the variant is seeded)")
     p.set_defaults(fn=cmd_forecast)
+    p = sub.add_parser("hindcast")
+    p.add_argument("--seasons", type=int, nargs="+", default=[2025, 2024], help="season start years")
+    p.add_argument("--groups", nargs="*")
+    p.add_argument("--workers", type=int, default=3)
+    p.add_argument("--draws", type=int, default=150)
+    p.set_defaults(fn=cmd_hindcast)
     p = sub.add_parser("report")
     p.add_argument("--reference-date", type=_date)
     p.set_defaults(fn=cmd_report)

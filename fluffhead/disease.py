@@ -55,8 +55,8 @@ class DiseaseParams:
     sym_contact: np.ndarray = field(default_factory=lambda: np.array([1.0, 0.5, 0.3, 1.0, 0.5]))
 
     # --- immunity
-    prior_immune: np.ndarray = field(default_factory=lambda: _age(0.15, 0.25, 0.35, 0.40, 0.40))  # calibrated jointly with beta
-    ve_infection: float = 0.40         # leaky vaccine effect on susceptibility
+    prior_immune: np.ndarray = field(default_factory=lambda: _age(0.25, 0.30, 0.40, 0.35, 0.30))  # scaled by the fitted immune_scale; lower from 65 (immunosenescence)
+    ve_infection: float = 0.40         # leaky vaccine effect on susceptibility; fitted per draw (calibrate.Prior), this is where RMap measures R
     ve_hosp_extra: float = 0.20        # further reduction of P(admit | infected) when vaccinated
     vaccine_delay_days: int = 14
 

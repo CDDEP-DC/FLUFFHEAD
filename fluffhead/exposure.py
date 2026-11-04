@@ -72,11 +72,32 @@ def airport_index() -> pd.Series:
     path = TRAVEL_DIR / "airport_index.csv"
     if path.exists():
         return pd.read_csv(path, index_col=0).iloc[:, 0]
-    from .greasypop import ABBR
     if not ENPLANEMENTS.exists():
         _download(ENPLANEMENTS_URL, ENPLANEMENTS)
     e = pd.read_excel(ENPLANEMENTS).dropna(subset=["Locid"])
     e = e.assign(enpl=e["CY 25 Enplanements"].fillna(0))
+    county = airport_counties()
+    e["fips"] = e.Locid.map(county)
+    miss = e[e.fips.isna()].sort_values("enpl", ascending=False)
+    log.info("airports: %.1f%% of enplanements matched to a county; largest unmatched: %s",
+             100 * e.enpl[e.fips.notna()].sum() / e.enpl.sum(),
+             ", ".join(f"{r.Locid} ({r.enpl / 1e6:.1f}M)" for r in miss.head(5).itertuples()))
+    counties = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str, "state": str}, keep_default_na=False)
+    us_rate = e.enpl.sum() / counties["pop"].sum()
+    c = counties.merge(e.groupby("fips").enpl.sum().rename("enpl"), left_on="fips", right_index=True, how="left")
+    g = c[c.group != ""].groupby("group").agg(pop=("pop", "sum"), enpl=("enpl", "sum"))
+    a = (1 - AIRPORT_WEIGHT) + AIRPORT_WEIGHT * np.sqrt(g.enpl.fillna(0) / g["pop"] / us_rate)
+    a = (a / np.average(a, weights=g["pop"])).rename("travel_factor")
+    a.to_csv(path)
+    return a
+
+
+def airport_counties() -> dict[str, str]:
+    """{airport id (FAA and ICAO forms): county FIPS}, from the ASOS station at each airport."""
+    path = TRAVEL_DIR / "airport_counties.csv"
+    if path.exists():
+        return pd.read_csv(path, dtype=str).set_index("airport").fips.to_dict()
+    from .greasypop import ABBR
     import json
     fips_of = {a: f for f, a in ABBR.items()}
     from .weather import _centroids, _get, _km
@@ -102,19 +123,8 @@ def airport_index() -> pd.Series:
             county[sid] = fips
             if len(sid) == 4:    # ICAO ids (PHNL, PANC, TJSJ) -> FAA ids
                 county.setdefault(sid[1:], fips)
-    e["fips"] = e.Locid.map(county)
-    miss = e[e.fips.isna()].sort_values("enpl", ascending=False)
-    log.info("airports: %.1f%% of enplanements matched to a county; largest unmatched: %s",
-             100 * e.enpl[e.fips.notna()].sum() / e.enpl.sum(),
-             ", ".join(f"{r.Locid} ({r.enpl / 1e6:.1f}M)" for r in miss.head(5).itertuples()))
-    counties = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str, "state": str}, keep_default_na=False)
-    us_rate = e.enpl.sum() / counties["pop"].sum()
-    c = counties.merge(e.groupby("fips").enpl.sum().rename("enpl"), left_on="fips", right_index=True, how="left")
-    g = c[c.group != ""].groupby("group").agg(pop=("pop", "sum"), enpl=("enpl", "sum"))
-    a = (1 - AIRPORT_WEIGHT) + AIRPORT_WEIGHT * np.sqrt(g.enpl.fillna(0) / g["pop"] / us_rate)
-    a = (a / np.average(a, weights=g["pop"])).rename("travel_factor")
-    a.to_csv(path)
-    return a
+    pd.DataFrame({"airport": list(county), "fips": list(county.values())}).to_csv(path, index=False)
+    return county
 
 
 # ------------------------------------------------------------------ tracts

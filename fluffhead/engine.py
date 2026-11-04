@@ -14,6 +14,15 @@ susceptibility (prior immunity, vaccination) are applied when an event fires, by
 thinning: the event infects with probability calendar[layer, day] * susceptibility.
 Calendar values are <= 1, so this is exact for a time-varying hazard.
 
+Strains. Up to MAX_STRAINS co-circulate. Each person has an infection time per strain
+(t_inf[strain, person]) and can be infected once by each. Prior immunity is a
+per-person bitmask (bit s: protected against strain s). Per strain: relative
+transmissibility (StrainParams.rel_beta) and vaccine effects on infection (ve_inf) and on
+admission given infection (ve_hosp). An
+infection with one strain protects against each other strain, all or nothing, with
+probability `cross` (sets that strain's bit). Imports are per strain ([strains, days]).
+An event's strain travels in the heap's layer byte (layer + 8 x strain).
+
 State is a set of numpy arrays (infection time per person, the event heap, and the
 infection records), so a run can be saved at a date and continued later.
 """
@@ -40,6 +49,7 @@ LAYER_NAMES = ["household", "workplace", "school", "gq", "community", "community
 (S_LAT_M, S_LAT_K, S_PRE_M, S_PRE_K, S_SYM_K, S_ASYM_M, S_ASYM_REL, S_ADM_M, S_ADM_K,
  S_VE_INF, S_VE_HOSP, S_COMM_RATE, S_COMM_GLOBAL, S_COMM_WORK, S_VACC_DELAY) = range(15)
 N_SCALARS = 15
+MAX_STRAINS = 2
 
 
 def pack(p: DiseaseParams):
@@ -122,37 +132,45 @@ def _run(day0, day1,
          starts, pool, used, budget, kinds, Ks, assocs, betas_sw, net_seed,
          prior_imm, vacc_day,
          sc, sym_mean, asym_frac, hosp_p, beta, sym_contact,
+         rel_beta, ve_inf, ve_hosp, cross,
          cal, imp,
          t_inf, ht, hj, hs, hl, hn,
-         r_j, r_t, r_src, r_L, r_sym, r_on, r_adm, r_vac, rn):
-    n = len(t_inf)
+         r_j, r_t, r_src, r_L, r_sym, r_on, r_adm, r_vac, r_str, rn):
+    n_str, n = t_inf.shape
     T = cal.shape[1]
     cmax = max(comm_mult.max(), 1.0) if len(comm_mult) > 0 else 1.0
     for d in range(day0, day1):
-        # importations: Poisson count per day (hazard per unit weight x total weight), people picked
-        # in proportion to their weight, uniform times within the day
+        # importations: Poisson count per day and strain (hazard per unit weight x total weight),
+        # people picked in proportion to their weight, uniform times within the day
         W = imp_cum[n - 1] if n > 0 else 0.0
         if W > 0:
-            for _ in range(np.random.poisson(imp[d] * W)):
-                k = min(np.searchsorted(imp_cum, np.random.random() * W, side="right"), n - 1)
-                ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, d + np.random.random(), k, -1, IMPORT)
+            for s0 in range(n_str):
+                for _ in range(np.random.poisson(imp[s0, d] * W)):
+                    k = min(np.searchsorted(imp_cum, np.random.random() * W, side="right"), n - 1)
+                    ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, d + np.random.random(), k, -1, IMPORT + 8 * s0)
 
         while hn > 0 and ht[0] < d + 1:
-            t, k, src, L, hn = _pop(ht, hj, hs, hl, hn)
-            if t_inf[k] < INF:
+            t, k, src, code, hn = _pop(ht, hj, hs, hl, hn)
+            L = code & 7
+            sk = code >> 3
+            if t_inf[sk, k] < INF:
                 continue
             day = min(int(t), T - 1)
             vaccinated = vacc_day[k] >= 0 and t >= vacc_day[k] + sc[S_VACC_DELAY]
             p_acc = cal[L, day]
-            if prior_imm[k]:
+            if (prior_imm[k] >> sk) & 1:
                 p_acc = 0.0
             elif vaccinated:
-                p_acc *= 1.0 - sc[S_VE_INF]
+                p_acc *= 1.0 - ve_inf[sk]
             if np.random.random() >= p_acc:
                 continue
 
-            # ---- infect k at time t: draw the timeline
-            t_inf[k] = t
+            # ---- infect k with strain sk at time t: cross-protection, then the timeline
+            t_inf[sk, k] = t
+            for o in range(n_str):
+                if o != sk and t_inf[o, k] == INF and np.random.random() < cross:
+                    prior_imm[k] |= np.uint8(1 << o)
+            bs = rel_beta[sk]
             a = age_group[k]
             if a < 0:
                 a = 2
@@ -165,7 +183,7 @@ def _run(day0, day1,
             if sym:
                 on = ti + np.random.gamma(sc[S_PRE_K], sc[S_PRE_M] / sc[S_PRE_K])
                 end = on + np.random.gamma(sc[S_SYM_K], sym_mean[a] / sc[S_SYM_K])
-                ph = hosp_p[a] * ((1.0 - sc[S_VE_HOSP]) if vaccinated else 1.0)
+                ph = hosp_p[a] * ((1.0 - ve_hosp[sk]) if vaccinated else 1.0)
                 if np.random.random() < ph:
                     adm = on + np.random.gamma(sc[S_ADM_K], sc[S_ADM_M] / sc[S_ADM_K])
                     end = min(end, adm)   # no transmission after admission
@@ -180,8 +198,9 @@ def _run(day0, day1,
 
             r_j = _grow(r_j, rn); r_t = _grow(r_t, rn); r_src = _grow(r_src, rn); r_L = _grow(r_L, rn)
             r_sym = _grow(r_sym, rn); r_on = _grow(r_on, rn); r_adm = _grow(r_adm, rn); r_vac = _grow(r_vac, rn)
+            r_str = _grow(r_str, rn)
             r_j[rn] = k; r_t[rn] = t; r_src[rn] = src; r_L[rn] = L
-            r_sym[rn] = sym; r_on[rn] = on; r_adm[rn] = adm; r_vac[rn] = vaccinated
+            r_sym[rn] = sym; r_on[rn] = on; r_adm[rn] = adm; r_vac[rn] = vaccinated; r_str[rn] = sk
             rn += 1
 
             # ---- schedule candidate transmissions along each contact
@@ -191,7 +210,7 @@ def _run(day0, day1,
                     continue
                 for Lc in range(4):
                     m = sym_contact[Lc] if seg_sym[s] else 1.0
-                    lam = beta[Lc] * seg_rel[s] * m * D
+                    lam = beta[Lc] * bs * seg_rel[s] * m * D
                     if lam <= 0.0:
                         continue
                     for q in range(pp[Lc][k], pp[Lc][k + 1]):
@@ -202,9 +221,9 @@ def _run(day0, day1,
                         if Lc == HH:
                             for x in range(g0, g0 + ng):
                                 c = gm[Lc][x]
-                                if c != k and t_inf[c] == INF:
+                                if c != k and t_inf[sk, c] == INF:
                                     for _ in range(np.random.poisson(lam)):
-                                        ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, seg_a[s] + np.random.random() * D, c, k, Lc)
+                                        ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, seg_a[s] + np.random.random() * D, c, k, Lc + 8 * sk)
                             continue
                         if starts[Lc][g] < 0:
                             if used > budget:
@@ -217,14 +236,14 @@ def _run(day0, day1,
                         loc = slot - g0
                         for e in range(pool[st + loc], pool[st + loc + 1]):
                             c = gm[Lc][g0 + pool[st + ng + 1 + e]]
-                            if t_inf[c] == INF:
+                            if t_inf[sk, c] == INF:
                                 for _ in range(np.random.poisson(lam)):
-                                    ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, seg_a[s] + np.random.random() * D, c, k, Lc)
+                                    ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, seg_a[s] + np.random.random() * D, c, k, Lc + 8 * sk)
 
                 # community encounters that transmit (thinned Poisson), at home or work tract; drawn
                 # at the highest tract multiplier and kept with probability multiplier / highest
                 m = sym_contact[COMM] if seg_sym[s] else 1.0
-                for _ in range(np.random.poisson(sc[S_COMM_RATE] * cmax * D * m * beta[COMM] * seg_rel[s])):
+                for _ in range(np.random.poisson(sc[S_COMM_RATE] * cmax * D * m * beta[COMM] * bs * seg_rel[s])):
                     tt = seg_a[s] + np.random.random() * D
                     row = COMM
                     if np.random.random() < sc[S_COMM_GLOBAL]:
@@ -239,17 +258,30 @@ def _run(day0, day1,
                         if tr < 0 or np.random.random() * cmax >= comm_mult[tr]:
                             continue
                         c = tract_mem[tract_ptr[tr] + np.random.randint(tract_ptr[tr + 1] - tract_ptr[tr])]
-                    if c != k and t_inf[c] == INF:
-                        ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, tt, c, k, row)
+                    if c != k and t_inf[sk, c] == INF:
+                        ht, hj, hs, hl, hn = _push(ht, hj, hs, hl, hn, tt, c, k, row + 8 * sk)
     return (pool, used, ht, hj, hs, hl, hn,
-            r_j, r_t, r_src, r_L, r_sym, r_on, r_adm, r_vac, rn)
+            r_j, r_t, r_src, r_L, r_sym, r_on, r_adm, r_vac, r_str, rn)
 
 
 # --------------------------------------------------------------- wrapper
 @dataclass
 class Immunity:
-    prior_immune: np.ndarray      # bool [n]
+    prior_immune: np.ndarray      # [n] uint8 bitmask (bit s: protected against strain s); bool = all strains
     vacc_day: np.ndarray          # int16 [n]: day index vaccinated, -1 never
+
+
+@dataclass
+class StrainParams:
+    """Per-strain properties; the defaults are one strain, as before strains existed."""
+    rel_beta: tuple = (1.0,)      # transmissibility relative to DiseaseParams.beta_scale
+    ve_inf: tuple | None = None   # vaccine effect on infection (default DiseaseParams.ve_infection)
+    ve_hosp: tuple | None = None  # ...on admission given infection (default DiseaseParams.ve_hosp_extra)
+    cross: float = 0.0            # P(an infection protects against each other strain)
+
+    @property
+    def n(self) -> int:
+        return len(self.rel_beta)
 
 
 class Simulation:
@@ -258,27 +290,36 @@ class Simulation:
     def __init__(self, net: Network, params: DiseaseParams, calendar: np.ndarray, start: dt.date,
                  immunity: Immunity, imports: np.ndarray, import_weight: np.ndarray | None = None,
                  mode: str = "full", net_seed: int = 1, seed: int = 1, pool: EdgePool | None = None,
-                 lazy_budget_bytes: int = 2 << 30, community_mult: np.ndarray | None = None):
+                 lazy_budget_bytes: int = 2 << 30, community_mult: np.ndarray | None = None,
+                 strains: StrainParams | None = None):
         """`imports`: daily importation hazard per unit of `import_weight` (default weight 1 for
-        residents, 0 otherwise); `community_mult`: per-tract community rate multiplier (default 1)."""
+        residents, 0 otherwise), [days] for one strain or [strains, days]; `community_mult`:
+        per-tract community rate multiplier (default 1)."""
         params.check()
         self.net, self.params, self.start = net, params, start
+        self.strains = strains or StrainParams()
+        S = self.strains.n
+        assert 1 <= S <= MAX_STRAINS
         self.cal = np.ascontiguousarray(calendar, np.float64)
         assert self.cal.shape[0] == N_ROWS
-        self.imp = np.asarray(imports, np.float64)
+        imp = np.asarray(imports, np.float64)
+        self.imp = np.ascontiguousarray(imp[None, :] if imp.ndim == 1 else imp)
+        assert self.imp.shape[0] == S, "imports need one row per strain"
         w = net.resident.astype(np.float64) if import_weight is None else np.asarray(import_weight, np.float64)
         self.imp_cum = np.cumsum(w)
         self.comm_mult = (np.ones(net.n_tracts) if community_mult is None
                           else np.ascontiguousarray(community_mult, np.float64))
-        self.imm = immunity
+        pi = np.asarray(immunity.prior_immune)
+        mask = np.where(pi, np.uint8((1 << S) - 1), np.uint8(0)) if pi.dtype == np.bool_ else pi.astype(np.uint8)
+        self.imm = Immunity(mask.copy(), immunity.vacc_day)    # copied: cross-protection sets bits during the run
         self.pool = pool or EdgePool.create(net, mode, net_seed, lazy_budget_bytes)
         self.day = 0
-        self.t_inf = np.full(net.n, INF, np.float32)
+        self.t_inf = np.full((S, net.n), INF, np.float32)
         self.heap = (np.empty(1 << 16), np.empty(1 << 16, np.int32), np.empty(1 << 16, np.int32),
                      np.empty(1 << 16, np.int8), 0)
         self.rec = [np.empty(1 << 14, np.int32), np.empty(1 << 14), np.empty(1 << 14, np.int32),
                     np.empty(1 << 14, np.int8), np.empty(1 << 14, np.bool_), np.empty(1 << 14),
-                    np.empty(1 << 14), np.empty(1 << 14, np.bool_)]
+                    np.empty(1 << 14), np.empty(1 << 14, np.bool_), np.empty(1 << 14, np.int8)]
         self.rn = 0
         rules = [layer_rule(net, L) if L in EDGE_LAYERS else (0, 0, 0.0, 0.0) for L in range(4)]
         self.kinds = np.array([r[0] for r in rules], np.int64)
@@ -297,6 +338,9 @@ class Simulation:
             return
         net, ep, imm = self.net, self.pool, self.imm
         packed = pack(self.params)
+        st = self.strains
+        ve = np.array(st.ve_inf if st.ve_inf is not None else [self.params.ve_infection] * st.n, np.float64)
+        veh = np.array(st.ve_hosp if st.ve_hosp is not None else [self.params.ve_hosp_extra] * st.n, np.float64)
         budget = ep.budget if ep.mode == "lazy" else np.iinfo(np.int64).max
         out = _run(self.day, day,
                    net.age_group, net.home_tract, net.work_tract, net.tract_ptr, net.tract_mem,
@@ -304,20 +348,22 @@ class Simulation:
                    tuple(net.grp_ptr), tuple(net.grp_mem), tuple(net.grp_blk), tuple(net.per_ptr), tuple(net.per_slot), tuple(net.grp_of),
                    tuple(ep.start), ep.pool, ep.used, budget, self.kinds, self.Ks, self.assocs, self.betas_sw,
                    ep.net_seed, imm.prior_immune, imm.vacc_day,
-                   *packed, self.cal, self.imp,
+                   *packed, np.array(st.rel_beta, np.float64), ve, veh, float(st.cross),
+                   self.cal, self.imp,
                    self.t_inf, *self.heap, *self.rec, self.rn)
         ep.pool, ep.used = out[0], out[1]
         self.heap = out[2:7]
-        self.rec = list(out[7:15])
-        self.rn = out[15]
+        self.rec = list(out[7:16])
+        self.rn = out[16]
         self.day = day
 
     # ------------------------------------------------------------- outputs
     def infections(self) -> pd.DataFrame:
         """One row per infection so far: who, when, by whom, where, outcome."""
         n = self.rn
-        j, t, src, L, sym, on, adm, vac = (a[:n] for a in self.rec)
+        j, t, src, L, sym, on, adm, vac, strain = (a[:n] for a in self.rec)
         return pd.DataFrame({"person": j, "t": t, "infector": src, "layer": np.array(LAYER_NAMES)[L],
+                             "strain": strain,
                              "symptomatic": sym, "onset": np.where(on >= 0, on, np.nan),
                              "admit": np.where(adm >= 0, adm, np.nan), "vaccinated": vac,
                              "age_group": self.net.age_group[j], "county": self.net.counties[self.net.county[j]],
@@ -349,7 +395,7 @@ class Simulation:
         self.heap = (*heap, hn)
         self.rn = len(z["rec0"])
         self.rec = []
-        for i in range(8):
+        for i in range(9):
             a = z[f"rec{i}"]
             b = np.empty(max(1 << 14, 2 * len(a)), a.dtype); b[:len(a)] = a
             self.rec.append(b)

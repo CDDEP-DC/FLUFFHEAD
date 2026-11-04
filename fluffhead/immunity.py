@@ -8,6 +8,7 @@ own data exist, the latest complete season stands in for it.
 
 Prior immunity: all-or-nothing protection from earlier seasons' infections and
 cross-reactive antibodies, by age group; a calibrated parameter (see disease.py).
+With a variant (strains.py), part of it doesn't cover the variant.
 """
 from __future__ import annotations
 
@@ -136,7 +137,18 @@ def prior_immunity(net: Network, p_by_age: np.ndarray, rng: np.random.Generator)
 
 
 def build(net: Network, p_by_age: np.ndarray, start: dt.date, season_start_year: int,
-          default_state: str, seed: int) -> Immunity:
+          default_state: str, seed: int, escape=None) -> Immunity:
+    """With `escape` (two strains, strains.py; a share, or a share by age group): prior immunity
+    as a bitmask, protected against strain 1 as before and against the variant only if not
+    among the `escape` share."""
     rng = np.random.default_rng(seed)
     cov = coverage(season_start_year)
-    return Immunity(prior_immunity(net, p_by_age, rng), vaccination_days(net, cov, start, rng, default_state))
+    imm = prior_immunity(net, p_by_age, rng)
+    vacc = vaccination_days(net, cov, start, rng, default_state)
+    if escape is None:
+        return Immunity(imm, vacc)
+    e = np.asarray(escape, float)
+    if e.ndim:
+        e = e[np.where(net.age_group < 0, 2, net.age_group)]
+    keep = imm & (rng.random(net.n) >= e)
+    return Immunity(imm.astype(np.uint8) | (keep.astype(np.uint8) << 1), vacc)

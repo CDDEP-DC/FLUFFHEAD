@@ -27,7 +27,7 @@ from . import config as C
 log = logging.getLogger(__name__)
 TEMPLATE = Path(__file__).with_name("report_template.html")
 LEVELS = [0.025, 0.25, 0.5, 0.75, 0.975]
-PARAMS = ["r_now", "immune_scale", "travel_share", "humidity_floor", "beta_scale"]
+PARAMS = ["r_now", "immune_scale", "travel_share", "humidity_floor", "ve_infection", "beta_scale"]
 MIN_ESS = 5.0
 MIN_PHI = 0.5     # below this the likelihood was tempered hard: the model can't follow the data closely
 
