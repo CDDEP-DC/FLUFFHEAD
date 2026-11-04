@@ -395,3 +395,18 @@ def test_start_correction():
     assert (out[2, cut:] - bg) / (out[0, cut:] - bg) == pytest.approx((daily[2, cut:] - bg) / (daily[0, cut:] - bg))
     same, r = CB.start_correction(daily, np.array([np.nan]), cut, bg)
     assert r == pytest.approx(1.0) and same == pytest.approx(daily)
+
+
+def test_r_map_inverse_stays_finite_on_a_noisy_row():
+    from fluffhead.calibrate import RMap
+    x = np.array((1.25, 2.0, 3.0, 4.5, 6.5))
+    immune = np.array((0.5, 1.0, 1.5))
+    r = np.array([[0.55, 0.82, 1.18, 1.7, 2.24], [0.48, 0.65, 0.96, 1.23, 1.85], [0.35, 0.45, 0.68, 1.01, 1.29]])
+    assert RMap(x, immune, r).x_for(1.5, 1.5) == pytest.approx(8.15, rel=0.1)   # clean map: the same scale
+    assert RMap(x, immune, r).x_for(0.9, 1.0) == pytest.approx(2.8, rel=0.1)    # inside the grid
+    r[2] = [0.35, 0.45, 0.68, 1.01, 0.97]                                       # top point below its neighbour
+    for target in (1.02, 1.05, 1.2, 1.5):
+        got = RMap(x, immune, r).x_for(target, 1.5)
+        assert 4.0 < got < 6.5 * 4 + 1e-6
+    r[:] = 0.04                                                                  # nothing spreads at all
+    assert np.isfinite(RMap(x, immune, r).x_for(1.0, 1.0))

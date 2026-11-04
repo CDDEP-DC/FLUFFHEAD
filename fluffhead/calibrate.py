@@ -329,6 +329,17 @@ def _extrap(x0: float, xs: np.ndarray, ys: np.ndarray) -> float:
     return float(np.interp(x0, xs, ys))
 
 
+def _invert_row(lr0: float, lr: np.ndarray, lx: np.ndarray) -> float:
+    """log x for log R = lr0 on one row of the R map. Past the row's ends it follows the slope of the
+    whole row, not of the last segment: in a small region noise can leave that segment flat, and
+    its slope would send x to infinity. Bounded at a factor of 4 past the grid."""
+    if lr[0] < lr0 < lr[-1]:
+        return float(np.interp(lr0, lr, lx))
+    slope = (lx[-1] - lx[0]) / max(lr[-1] - lr[0], 0.1)
+    v = lx[-1] + (lr0 - lr[-1]) * slope if lr0 >= lr[-1] else lx[0] + (lr0 - lr[0]) * slope
+    return float(np.clip(v, lx[0] - np.log(4), lx[-1] + np.log(4)))
+
+
 @dataclass
 class RMap:
     """Measured effective R at the cutoff on a grid of transmissibility x (beta_scale times the
@@ -357,7 +368,7 @@ class RMap:
         per = []
         for row in self.r:
             lr = np.log(np.maximum.accumulate(np.maximum(row, 0.05)) + 1e-9 * np.arange(len(row)))
-            per.append(_extrap(np.log(r), lr, lx))
+            per.append(_invert_row(np.log(r), lr, lx))
         return float(np.exp(_extrap(immune, self.immune, np.array(per))))
 
 
