@@ -41,6 +41,12 @@ Parameters. Five are fitted, each with a prior on an interpretable scale:
                   fits drift to no effect (rho ~0.8-1) and forecasts with almost no winter
                   rise, e.g. Maryland peaks a third of any recent season's.
 
+Holiday rise. FORCING multiplies transmission by date, on top of humidity and the school and work
+calendar: x1.2 from Dec 10 to Dec 31. Backtests on 2023-24 to 2025-26 (weekly cutoffs, 1-4 weeks
+ahead) put it there: without it the fits under-call the December climb, and ending it Dec 24 made
+the forecasts level off a week before the real peaks. The holiday lift is the same every year; it
+is a calendar effect, not a fitted one.
+
 Score. Negative binomial log likelihood of the weekly targets (recent weeks weighted
 more), plus the multipliers' prior, plus a growth term: the log-linear slope of the
 region's total admissions over the last GROWTH_WEEKS weeks, model vs data, with sd
@@ -112,7 +118,7 @@ GROWTH_SD = 0.05                # its extra sd (per week, log scale) beyond coun
 START_PSEUDO = 10.0             # start_correction: admissions added to both sides of the ratio, so small counts stay near 1
 IMPORT_STEP_DAYS = 7            # forecast: national import pressure updated from the run's own incidence this often
 IMPORT_MIN_REF = 20             # ...if the run had at least this many resident infections in the week to the cutoff
-INFECTIONS_PER_ADMISSION = 150  # converts national admissions per capita to infection incidence
+INFECTIONS_PER_ADMISSION = 75   # converts national admissions per capita to import pressure (backtests: 75 beat 150 and 37.5)
 R_GRID_X = (1.25, 2.0, 3.0, 4.5, 6.5)   # RMap: beta_scale x seasonal factor
 R_GRID_IMMUNE = (0.5, 1.0, 1.5)         # RMap: immune_scale
 R_GRID_IMMUNE_VARIANT = (0.1, 0.3)      # ...plus these with a variant (immune_scale x (1 - escape))
@@ -120,15 +126,18 @@ R_YOUNG_POINTS = 3                       # RMap: escape-under-25 grid points (th
 R_RUN_DAYS = 21                 # RMap runs: seeded at the cutoff, run this long
 R_COHORT_DAYS = 7               # RMap: R = offspring per first-generation case infected in this window
 ANCHOR_DAYS = 14                # r_now's humidity: mean seasonal factor over this many days...
+MULT_CENTER = None              # log prior centre of the multipliers, per piece (backtests); None for 0
 DIAG_DAYS = 14                  # per-draw diagnostics (draws csv): the days to the cutoff
 ANCHOR_LAG = 7                  # ...ending this many days before the cutoff
+FORCING: tuple = (((12, 10), (12, 31), 1.2),)   # ((month, day), (month, day), multiplier) of transmission by date:
+                                # the holiday rise (backtests: Dec 10-31 x1.2 beat Dec 10-24 and none)
 FALLBACK_AMPLITUDE = 0.2        # cosine seasonality when no humidity data
 
 
 @dataclass
 class Prior:
     """Uniform (or log-uniform) priors on the calibrated parameters."""
-    r_now: tuple = (0.8, 1.5)               # seasonal influenza R ~1.2-1.4 in growth (Biggerstaff 2014)
+    r_now: tuple = (1.1, 1.3)               # seasonal influenza R ~1.2-1.4 in growth (Biggerstaff 2014); 0.9-1.3 forecast worse
     immune_scale: tuple = (0.5, 1.5)        # multiplies DiseaseParams.prior_immune
     travel_share: tuple = (0.01, 0.04)      # log-uniform
     humidity_floor: tuple = (0.4, 0.6)      # 1 would mean humidity has no effect
@@ -224,7 +233,8 @@ def season_start(day: dt.date) -> dt.date:
 
 def setup(group: str, net: Network, ref_date: dt.date, horizon_end: dt.date, locations: pd.DataFrame,
           mode: str | None = None, n_parallel: int = 1, net_seed: int = 1,
-          activity: pd.DataFrame | None = None, scenario: ST.Scenario | None = None) -> Region:
+          activity: pd.DataFrame | None = None, scenario: ST.Scenario | None = None,
+          weather_as_of: dt.date | None = None, weather_today: dt.date | None = None) -> Region:
     counties = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str, "state": str}, keep_default_na=False)
     mine = counties[counties.group == group]
     state_pop2019 = counties.groupby("state")["pop"].sum()
@@ -254,7 +264,7 @@ def setup(group: str, net: Network, ref_date: dt.date, horizon_end: dt.date, loc
         log.info("%s: share of state flu activity (ED-weighted / population): %s", group,
                  ", ".join(f"{s} {a:.3f}/{p:.3f}" for s, a, p in zip(pieces, act_share.iloc[-1], share)))
     try:
-        humidity = W.region_humidity(group, start, days)
+        humidity = W.region_humidity(group, start, days, today=weather_today, as_of=weather_as_of)
     except Exception as e:      # no weather: cosine seasonality
         log.warning("%s: humidity unavailable (%s); cosine seasonality", group, e)
         humidity = None
@@ -311,7 +321,18 @@ def season(region: Region, rho: float, q: np.ndarray | None = None) -> np.ndarra
     if region.humidity is None:
         return np.array([K.seasonality(region.start + dt.timedelta(days=i), FALLBACK_AMPLITUDE)
                          for i in range(region.days)])
-    return W.factor(region.humidity.path() if q is None else q, rho)
+    return W.factor(region.humidity.path() if q is None else q, rho) * _forcing(region)
+
+
+def _forcing(region: Region) -> np.ndarray:
+    """Daily multiplier from FORCING, scaled to at most 1 (calendars thin events; beta_scale makes up for it)."""
+    f = np.ones(region.days)
+    days = [region.start + dt.timedelta(days=i) for i in range(region.days)]
+    for (m0, d0), (m1, d1), x in FORCING:
+        y = region.start.year
+        a, b = dt.date(y, m0, d0), dt.date(y + (m1 < m0), m1, d1)
+        f[[a <= d <= b for d in days]] *= x
+    return f / f.max()
 
 
 def season_now(region: Region, rho: float) -> float:
@@ -630,7 +651,7 @@ def score(mu: np.ndarray, y: np.ndarray, base: np.ndarray) -> tuple[float, np.nd
     r = NB_SIZE
     ll = (special.gammaln(y + r) - special.gammaln(r) - special.gammaln(y + 1)
           + r * np.log(r / (r + m)) + y * np.log(m / (r + m)))
-    log_prior = -0.5 * (np.log(mult) / MULT_LOG_SD) ** 2          # normal prior on log multiplier
+    log_prior = -0.5 * ((np.log(mult) - (0 if MULT_CENTER is None else MULT_CENTER)) / MULT_LOG_SD) ** 2   # normal prior on log multiplier
     return float(np.nansum(wt * ll) + log_prior.sum() + growth_term(m, y)), mult
 
 

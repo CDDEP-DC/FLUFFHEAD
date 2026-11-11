@@ -22,7 +22,8 @@ from .network import GQ, HH, SCH, WP
 
 WEEKEND_WORK = 0.25       # weekend workplace contact relative to weekdays
 HOLIDAY_WORK = 0.25
-WINTER_WEEK_WORK = 0.6    # Christmas to New Year
+WINTER_WEEK_WORK = 0.6    # Christmas Eve to the return after New Year
+WINTER_BREAK = True       # schools close Dec 21 until the return after New Year
 SEASON_PEAK_DOY = 15      # mid-January
 
 EARLY_START = {"01", "04", "05", "12", "13", "15", "18", "21", "22", "28", "35", "40", "45", "47", "48", "49", "32"}
@@ -47,6 +48,15 @@ def federal_holidays(year: int) -> set[dt.date]:
             _nth_weekday(year, 11, 3, 4), dt.date(year, 12, 25)}
 
 
+def winter_return(year: int) -> dt.date:
+    """First day back in January of `year`: the first Monday after New Year's Day, or Tuesday Jan 2
+    when New Year's Day is itself a Monday (a full extra week off is rare)."""
+    jan1 = dt.date(year, 1, 1)
+    if jan1.weekday() == 0:
+        return dt.date(year, 1, 2)
+    return jan1 + dt.timedelta(days=7 - jan1.weekday())
+
+
 def school_open(day: dt.date, state: str) -> bool:
     if day.weekday() >= 5:
         return False
@@ -60,8 +70,8 @@ def school_open(day: dt.date, state: str) -> bool:
     thanks = _nth_weekday(y, 11, 3, 4)
     if thanks - dt.timedelta(days=1) <= day <= thanks + dt.timedelta(days=1):
         return False
-    # winter break: Dec 21 through Jan 1 (weekends either side are already closed)
-    if dt.date(y, 12, 21) <= day <= dt.date(y + 1, 1, 1):
+    # winter break (weekends either side are already closed)
+    if WINTER_BREAK and dt.date(y, 12, 21) <= day < winter_return(y + 1):
         return False
     spring = _nth_weekday(y + 1, 3, 0, 3) if state in EARLY_START else _nth_weekday(y + 1, 4, 0, 1)
     if spring <= day < spring + dt.timedelta(days=5):
@@ -93,7 +103,7 @@ def build(start: dt.date, days: int, state: str, season_amplitude: float = 0.2,
             work = WEEKEND_WORK
         elif hol:
             work = HOLIDAY_WORK
-        elif (d.month == 12 and d.day >= 24) or (d.month == 1 and d.day == 1):
+        elif (d.month == 12 and d.day >= 24) or (d.month == 1 and d < winter_return(d.year)):
             work = WINTER_WEEK_WORK
         cal[WP, i] = work
         cal[COMM_WORK, i] = work

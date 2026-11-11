@@ -232,7 +232,8 @@ class Humidity:
 
 
 def region_humidity(group: str, start: dt.date, days: int, today: dt.date | None = None,
-                    forecast: bool = True) -> Humidity:
+                    forecast: bool = True, as_of: dt.date | None = None) -> Humidity:
+    """`as_of`: backtests; the weather stops there, as it would have then (no NWS forecast)."""
     today = today or dt.date.today()
     st = station_weights(group)
     q = station_q(st, today)
@@ -244,7 +245,13 @@ def region_humidity(group: str, start: dt.date, days: int, today: dt.date | None
     dates = pd.date_range(start, periods=days)
     clim = clim_doy.reindex(dates.dayofyear).to_numpy()
     known = reg.reindex(dates).to_numpy().copy()
-    last_obs = reg.dropna().index.max()
+    if as_of is not None:
+        reg_known = reg[reg.index <= pd.Timestamp(as_of)]
+        known = reg_known.reindex(dates).to_numpy().copy()
+        last_obs = reg_known.dropna().index.max()
+        forecast = False
+    else:
+        last_obs = reg.dropna().index.max()
     if forecast:
         counties = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str}, keep_default_na=False)
         cen = counties[counties.group == group].merge(_centroids(), on="fips")

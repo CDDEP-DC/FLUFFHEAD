@@ -1,5 +1,6 @@
 """Core checks on a small synthetic network (no downloaded data needed)."""
 import datetime as dt
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -133,6 +134,20 @@ def test_school_calendar():
     assert c[N.SCH, day(dt.date(2026, 12, 23))] == 0          # winter break
     assert c[N.SCH, day(dt.date(2026, 8, 25))] == 0           # before a post-Labor-Day start
     assert (c <= 1).all() and (c >= 0).all()
+
+
+def test_winter_return():
+    assert K.winter_return(2025) == dt.date(2025, 1, 6)       # Wednesday: the next Monday
+    assert K.winter_return(2026) == dt.date(2026, 1, 5)       # Thursday
+    assert K.winter_return(2024) == dt.date(2024, 1, 2)       # Monday: the day after
+    assert K.winter_return(2023) == dt.date(2023, 1, 2)       # Sunday
+    start = dt.date(2024, 8, 1)
+    c = K.build(start, 200, "24", 0.0)
+    day = lambda d: (d - start).days
+    assert c[N.SCH, day(dt.date(2025, 1, 3))] == 0            # the Friday before the return
+    assert c[N.WP, day(dt.date(2025, 1, 3))] == K.WINTER_WEEK_WORK
+    assert c[N.SCH, day(dt.date(2025, 1, 6))] == 1
+    assert c[N.WP, day(dt.date(2025, 1, 6))] == 1
 
 
 def test_rate_change_categories():
@@ -410,3 +425,22 @@ def test_r_map_inverse_stays_finite_on_a_noisy_row():
         assert 4.0 < got < 6.5 * 4 + 1e-6
     r[:] = 0.04                                                                  # nothing spreads at all
     assert np.isfinite(RMap(x, immune, r).x_for(1.0, 1.0))
+
+
+def test_teams_add_clustering_and_keep_degree():
+    from fluffhead import backtest as B
+    n, K = 600, 8
+    grp = dict(ptr=np.array([0, n]), mem=np.arange(n, dtype=np.int32), blk=np.zeros(n, np.int16))
+    net = SimpleNamespace(grp_ptr={N.WP: grp["ptr"], N.SCH: np.array([0])}, grp_mem={N.WP: grp["mem"], N.SCH: np.array([], np.int32)},
+                          grp_blk={N.WP: grp["blk"], N.SCH: np.array([], np.int16)}, home_tract=np.arange(n) // 60,
+                          params={"workplace_K": K, "school_K": 12, "income_associativity_coefficient": 0.9,
+                                  "school_associativity_coefficient": 0.9, "netw_B": 0.25, "gq_K": 12})
+    B.apply_structure(net, {"team": 20, "by_home": True})
+    lab = net.grp_blk[N.WP]
+    assert len(np.unique(lab)) == 30
+    us, vs = N._group_edges(0, lab, K, 0.9, 0.0, 5)
+    us, vs = np.array(list(us)), np.array(list(vs))
+    assert abs(2 * len(us) / n - K) < 1.0
+    assert (lab[us] == lab[vs]).mean() > 0.8
+    t = net.home_tract
+    assert (t[us] == t[vs]).mean() > 0.5        # teammates live near each other
