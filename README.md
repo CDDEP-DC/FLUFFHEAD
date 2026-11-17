@@ -2,7 +2,7 @@
 
 **FLU Forecasting Framework for Heterogeneous Edge-Activated Dynamics**: a network agent-based model that produces weekly influenza hospitalization forecasts for the [FluSight hub](https://github.com/cdcepi/FluSight-forecast-hub), as model `OHTJHU-FLUFFHEAD`.
 
-It simulates individual people in 116 US regions, about 265 million residents and 81% of the population, on synthetic populations built with [GREASYPOP-CO](https://github.com/CDDEP-DC/GREASYPOP-CO).
+It simulates individual people in 116 US regions, about 265 million residents and 81% of the population, on synthetic populations built from 2023 Census data with [GeoPops](https://github.com/GeoPopsHub/geopops). Set `FLUFFHEAD_NETWORK_VINTAGE=2019` to use the earlier networks, built from 2019 data with [GREASYPOP-CO](https://github.com/CDDEP-DC/GREASYPOP-CO).
 
 > **Status:** in development. The forecasts in `forecasts/` are working versions and have not been submitted to the hub.
 
@@ -35,12 +35,11 @@ python3.11 -m venv .venv
 .venv/bin/python -m pytest -q tests
 ```
 
-Networks and raw data aren't in this repo and must be built once, which takes many hours. That step also needs R, Julia, a local copy of GREASYPOP-CO, and a [Census API key](https://api.census.gov/data/key_signup.html) in the `CENSUS_API_KEY` environment variable. Don't commit the key.
+Networks and raw data aren't in this repo and must be built once, which takes many hours. That step also needs Julia, GeoPops in its own Python environment (`.venv-geopops/`), and a [Census API key](https://api.census.gov/data/key_signup.html) in the `CENSUS_API_KEY` environment variable. Don't commit the key.
 
 ```bash
 python -m fluffhead regions     # choose simulation groups
-python -m fluffhead fetch       # download GREASYPOP inputs
-python -m fluffhead networks    # build each group's network (resumable)
+python -m fluffhead networks --vintage 2023 --procs 8   # download GeoPops inputs and build each group's network (resumable)
 ```
 
 ## Weekly run

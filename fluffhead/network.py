@@ -61,7 +61,9 @@ class Network:
     tract_ptr: np.ndarray        # int64 [n_tracts+1] over tract_mem (residents then workers)
     tract_mem: np.ndarray        # int32
     params: dict                 # GREASYPOP network settings (K, associativity, beta)
-    tracts: np.ndarray | None = None   # tract GEOIDs (2010) indexed by home/work tract
+    tracts: np.ndarray | None = None   # tract GEOIDs indexed by home/work tract
+    vintage: int = 2019                # Census data year: 2019 (2010 tracts) or 2023 (2020 tracts)
+    age: np.ndarray | None = None      # int8 exact age, -1 for dummies (2023 networks on)
 
     @property
     def n_tracts(self) -> int:
@@ -84,7 +86,7 @@ def _person_index(mem: np.ndarray, n: int):
     return np.cumsum(ptr), order.astype(np.int64)
 
 
-def convert_export(export_dir: Path, out_dir: Path) -> Path:
+def convert_export(export_dir: Path, out_dir: Path, vintage: int = 2019) -> Path:
     """GREASYPOP groups_export/*.csv -> one compressed network.npz (plus params.json)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     ppl = pd.read_csv(export_dir / "people.csv", dtype={"sch_grade": str}, keep_default_na=False)
@@ -99,7 +101,8 @@ def convert_export(export_dir: Path, out_dir: Path) -> Path:
     resident = (ppl.hh_id >= 0).to_numpy()
 
     arrays = {"age_group": age_group, "county": county_idx.astype(np.int16), "counties": counties,
-              "resident": resident}
+              "resident": resident, "age": np.clip(age, -1, 127).astype(np.int8),
+              "vintage": np.array(vintage, np.int16)}
     out = np.zeros(n, bool)
     ow = pd.read_csv(export_dir / "outside_workers.csv")
     out[ow.idx.to_numpy()] = True
@@ -135,8 +138,8 @@ def convert_export(export_dir: Path, out_dir: Path) -> Path:
     return path
 
 
-def load(group: str, regions_dir: Path = C.REGIONS_DIR) -> Network:
-    d = regions_dir / group / "network"
+def load(group: str, regions_dir: Path = C.REGIONS_DIR, subdir: str | None = None) -> Network:
+    d = regions_dir / group / (subdir or C.NETWORK_SUBDIR)
     z = np.load(d / "network.npz", allow_pickle=False)
     n = len(z["age_group"])
     gp, gm, gb, pp, ps, go = [], [], [], [], [], []
@@ -151,7 +154,9 @@ def load(group: str, regions_dir: Path = C.REGIONS_DIR) -> Network:
                    home_tract=z["home_tract"], work_tract=z["work_tract"],
                    tract_ptr=z["tract_ptr"], tract_mem=z["tract_mem"],
                    params=json.loads((d / "params.json").read_text()),
-                   tracts=z["tracts"] if "tracts" in z else None)
+                   tracts=z["tracts"] if "tracts" in z else None,
+                   vintage=int(z["vintage"]) if "vintage" in z else 2019,
+                   age=z["age"] if "age" in z else None)
 
 
 # ------------------------------------------------------ edge generation (numba)

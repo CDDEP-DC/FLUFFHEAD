@@ -13,6 +13,11 @@ RAW_DIR = DATA_DIR / "raw"              # downloads (not tracked)
 REGIONS_DIR = DATA_DIR / "regions"      # region definitions (tracked) and networks (not tracked)
 WORK_DIR = REPO / "work"                # GREASYPOP working copies (not tracked)
 GREASYPOP_SRC = Path(os.environ.get("GREASYPOP_SRC", REPO.parent / "GREASYPOP-CO"))
+# which networks the model runs on: 2023 (GeoPops data, 2020 tracts, data/regions/<g>/network-2023/;
+# the default since 2026-11-16, about 3% lower WIS in the 2023-25 backtest) or 2019 (GREASYPOP,
+# 2010 tracts, data/regions/<g>/network/)
+NETWORK_VINTAGE = int(os.environ.get("FLUFFHEAD_NETWORK_VINTAGE", "2023"))
+NETWORK_SUBDIR = "network" if NETWORK_VINTAGE == 2019 else f"network-{NETWORK_VINTAGE}"
 
 # ----------------------------------------------------------------- geography
 # 2020 OMB delineations and 2019 county estimates, to match GREASYPOP's 2019 ACS

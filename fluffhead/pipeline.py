@@ -109,7 +109,7 @@ def load_week(ref_date: dt.date, nowcast: bool = True) -> WeekData:
 def built_groups() -> list[str]:
     g = pd.read_csv(C.REGIONS_DIR / "groups.csv")
     return [x for x in g.sort_values("pop", ascending=False).group
-            if (C.REGIONS_DIR / x / "network" / "network.npz").exists()]
+            if (C.REGIONS_DIR / x / C.NETWORK_SUBDIR / "network.npz").exists()]
 
 
 def _by_size(groups: list[str]) -> list[str]:

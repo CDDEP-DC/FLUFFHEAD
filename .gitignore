@@ -12,6 +12,7 @@ data/raw/
 # GREASYPOP working copies and generated networks (large; rebuild with `fluffhead networks`)
 work/
 data/regions/*/network/
+data/regions/*/network-*/
 
 # simulation outputs: keep summaries only
 runs/*/*
@@ -19,3 +20,4 @@ runs/*/*
 
 .env
 .venv-greasypop/
+.venv-geopops/

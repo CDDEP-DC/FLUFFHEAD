@@ -3,7 +3,8 @@
 Setup (once, or when region rules change):
     fluffhead regions        choose simulation groups -> data/regions/
     fluffhead fetch          download GREASYPOP inputs for every state the groups need
-    fluffhead networks       build each group's network with GREASYPOP (resumable)
+    fluffhead networks       build each group's network with GREASYPOP (resumable);
+                             --vintage 2023 uses GeoPops' 2023 data pipeline instead
 
 Weekly:
     fluffhead forecast       nowcast, fit and forecast every built group, write the submission
@@ -47,6 +48,8 @@ def cmd_regions(args) -> int:
 
 def cmd_fetch(args) -> int:
     from . import greasypop as G
+    if args.vintage == 2023:
+        from . import geopops as G
     groups = pd.read_csv(C.REGIONS_DIR / "groups.csv").group
     states = sorted({s for g in groups for s in _states(g)})
     G.download(states, C.REPO / "logs" / "download.log")
@@ -62,11 +65,17 @@ def cmd_networks(args) -> int:
     """
     from . import greasypop as G
     from .regions import anchor_groups
+    sub = "network"
+    if args.vintage == 2023:
+        from . import geopops as G
+        sub = G.network_dir("x").name
+    elif args.vintage != 2019:
+        raise SystemExit("--vintage must be 2019 (GREASYPOP) or 2023 (GeoPops)")
     groups = pd.read_csv(C.REGIONS_DIR / "groups.csv")
     anchors = set(anchor_groups())
     groups = groups.assign(anchor=~groups.group.isin(anchors)).sort_values(["anchor", "pop"])
     todo = [g for g in (args.groups or groups.group)
-            if not (C.REGIONS_DIR / g / "network" / "network.npz").exists() or args.force]
+            if not (C.REGIONS_DIR / g / sub / "network.npz").exists() or args.force]
     failed = []
     while todo:
         ready = [g for g in todo if all(G.downloaded(s) for s in _states(g))]
@@ -134,13 +143,17 @@ def main(argv=None) -> int:
     ap.add_argument("-v", "--verbose", action="store_true")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("regions").set_defaults(fn=cmd_regions)
-    sub.add_parser("fetch").set_defaults(fn=cmd_fetch)
+    p = sub.add_parser("fetch")
+    p.add_argument("--vintage", type=int, default=2019, help="2019 (GREASYPOP inputs) or 2023 (GeoPops inputs)")
+    p.set_defaults(fn=cmd_fetch)
     p = sub.add_parser("networks")
     p.add_argument("groups", nargs="*")
     p.add_argument("--procs", type=int, default=4, help="Julia worker processes for CO.jl")
     p.add_argument("--wait", action="store_true", help="wait for downloads still in progress")
     p.add_argument("--keep", action="store_true", help="keep GREASYPOP intermediates")
     p.add_argument("--force", action="store_true", help="rebuild groups that already have a network")
+    p.add_argument("--vintage", type=int, default=2019,
+                   help="2019: GREASYPOP with 2019 ACS; 2023: GeoPops data pipeline with 2023 ACS")
     p.set_defaults(fn=cmd_networks)
     p = sub.add_parser("forecast")
     p.add_argument("--reference-date", type=_date)

@@ -23,8 +23,8 @@ national incidence x (iota x travel_i + commute_i):
 
 Community density. A tract's community encounter rate is multiplied by
 (density / region mean)^gamma (DiseaseParams.community_density_gamma), density =
-the network's residents and workers there per square mile of land (2019 Census
-gazetteer, 2010 tracts as in GREASYPOP's ACS). Normalised to mean 1 over the
+the network's residents and workers there per square mile of land (Census
+gazetteer of the network's tracts: 2019 for 2010 tracts, 2023 for 2020 tracts). Normalised to mean 1 over the
 region's people, so it moves contact between a region's tracts without changing
 the region's total (the per-region R prior sets the level).
 """
@@ -128,19 +128,25 @@ def airport_counties() -> dict[str, str]:
 
 
 # ------------------------------------------------------------------ tracts
-def visitor_share(tracts: np.ndarray) -> np.ndarray:
-    """Share of each tract's jobs in visitor-facing industries (NaN where no LODES jobs)."""
+def visitor_share(tracts: np.ndarray, vintage: int = 2019) -> np.ndarray:
+    """Share of each tract's jobs in visitor-facing industries (NaN where no LODES jobs).
+
+    2019 networks (2010 tracts) use GREASYPOP's LODES7; 2023 networks (2020 tracts) LODES8 2023."""
     from .greasypop import ABBR
     out = pd.Series(np.nan, index=tracts)
+    store = C.RAW_DIR / ("greasypop" if vintage == 2019 else f"geopops{vintage}") / "work"
     for s in sorted({t[:2] for t in tracts}):
-        path = TRAVEL_DIR / f"visitor_jobs_{s}.csv"
+        path = TRAVEL_DIR / (f"visitor_jobs_{s}.csv" if vintage == 2019 else f"visitor_jobs_{vintage}_{s}.csv")
         if not path.exists():
-            files = sorted((C.RAW_DIR / "greasypop" / "work").glob(f"{ABBR[s].lower()}_wac_S000_JT01_*.csv.gz"))
+            files = sorted(store.glob(f"{ABBR[s].lower()}_wac_S000_JT01_*.csv.gz"))
             if not files:
                 continue
             w = pd.read_csv(files[-1], usecols=["w_geocode", "C000"] + VISITOR_INDUSTRIES, dtype={"w_geocode": str})
             width = 15 if w.w_geocode.str.len().max() > 12 else 12     # blocks, or block groups
             w["tract"] = w.w_geocode.str.zfill(width).str[:11]
+            if vintage != 2019 and s == "09":      # LODES8 keeps CT's old county codes
+                from .geopops import recode_ct
+                w["tract"] = recode_ct(w.tract)
             t = w.groupby("tract")[["C000"] + VISITOR_INDUSTRIES].sum()
             pd.DataFrame({"share": t[VISITOR_INDUSTRIES].sum(1) / t.C000.clip(lower=1)}).to_csv(path)
         sh = pd.read_csv(path, dtype={"tract": str}, index_col=0).share
@@ -148,7 +154,11 @@ def visitor_share(tracts: np.ndarray) -> np.ndarray:
     return out.to_numpy()
 
 
-def land_sqmi(tracts: np.ndarray) -> np.ndarray:
+def land_sqmi(tracts: np.ndarray, vintage: int = 2019) -> np.ndarray:
+    if vintage != 2019:            # 2020 tracts, with Connecticut's planning-region codes
+        from .geopops import _gazetteer
+        g = _gazetteer(vintage)
+        return g.set_index("GEOID").ALAND_SQMI.reindex(tracts).to_numpy()
     if not GAZETTEER.exists():
         _download(GAZETTEER_URL, GAZETTEER)
     g = pd.read_csv(GAZETTEER, sep="\t", dtype={"GEOID": str})
@@ -161,7 +171,7 @@ def community_multiplier(net, gamma: float) -> np.ndarray:
     size = np.diff(net.tract_ptr).astype(float)
     if gamma == 0 or net.tracts is None:
         return np.ones(len(size))
-    dens = size / np.maximum(land_sqmi(net.tracts), 0.05)
+    dens = size / np.maximum(land_sqmi(net.tracts, getattr(net, "vintage", 2019)), 0.05)
     ok = np.isfinite(dens) & (dens > 0)
     ref = np.exp(np.average(np.log(dens[ok]), weights=size[ok])) if ok.any() else 1.0
     m = np.where(ok, (dens / ref) ** gamma, 1.0)
@@ -180,7 +190,7 @@ def import_weights(group: str, net) -> tuple[np.ndarray, np.ndarray]:
     m = AGE_TRAVEL[ag].copy()
     worker = (net.work_tract >= 0) & net.resident
     if net.tracts is not None:
-        v = visitor_share(net.tracts)
+        v = visitor_share(net.tracts, getattr(net, "vintage", 2019))
         vw = v[net.work_tract[worker]]
         m[worker] *= 1 + VISITOR_GAIN * np.nan_to_num(vw, nan=np.nanmean(v) if np.isfinite(v).any() else 0.0)
     travel = np.where(net.resident, m, 0.0)
