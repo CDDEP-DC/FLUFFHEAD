@@ -82,6 +82,23 @@ def _activity(season: int, cutoff: dt.date) -> pd.DataFrame:
     return a
 
 
+def ed_admissions_gap(region, seen: pd.DataFrame, ed: pd.DataFrame, cut: dt.date) -> float:
+    """Region's weekly log growth of the ED flu share minus that of admissions, averaged over the
+    last two weeks to the cutoff. Pieces are weighted by their population (ED) and share (admissions)."""
+    weeks = pd.date_range(end=pd.Timestamp(cut), periods=3, freq="7D")
+    locs = D.load_locations().set_index("location").population
+    w = np.array([s * float(locs.get(p, 0)) for p, s in zip(region.pieces, region.piece_share)])
+    e = ed.pivot_table(index="date", columns="state", values="pct").reindex(index=weeks, columns=region.pieces)
+    a = seen.pivot_table(index="date", columns="location", values="value").reindex(index=weeks, columns=region.pieces)
+    ok = e.notna().all() & a.notna().all()
+    if not ok.any():
+        return 0.0
+    ev = (e.loc[:, ok] * w[ok.to_numpy()]).sum(1)
+    av = (a.loc[:, ok] * np.asarray(region.piece_share)[ok.to_numpy()]).sum(1)
+    g = lambda v: (np.log(v.iloc[-1] + 0.05) - np.log(v.iloc[0] + 0.05)) / 2
+    return float(g(ev / w[ok.to_numpy()].sum()) - g(av + 1))
+
+
 def national_r(us: pd.Series, cut: dt.date) -> float:
     """R implied by the last four weeks of national growth above the summer background, known at `cut`."""
     bg = us[f"{cut.year}-07-01":f"{cut.year}-08-31"].median()
@@ -162,7 +179,15 @@ def run_case(variant: str, spec: dict, season: int, cutoff: str, group: str, n_d
     if spec.get("travel_prior"):
         prior.travel_share = tuple(spec["travel_prior"])
     rp = spec.get("r_prior")
-    if isinstance(rp, dict) and "ed" in rp:     # R from the last three weeks' national ED growth, known at the cutoff
+    if isinstance(rp, dict) and "ed_gap" in rp:
+        # momentum: shift the R prior by how much faster (or slower) the region's ED flu share has grown
+        # than its admissions over the last two weeks; ED leads admissions, so a gap foretells a turn
+        lo, hi = rp.get("base", CB.Prior().r_now)
+        gap = ed_admissions_gap(region, seen, pd.read_csv(spec["ed_file"], dtype={"state": str}, parse_dates=["date"]), cut)
+        f = float(np.exp(np.clip(rp["ed_gap"] * gap / WEEKLY_GROWTH_PER_LOG_R, -0.25, 0.25)))
+        prior.r_now = (lo * f, hi * f)
+        logging.getLogger(__name__).info("%s: ED - admissions growth %+.3f/week -> R prior x%.3f", group, gap, f)
+    elif isinstance(rp, dict) and "ed" in rp:     # R from the last three weeks' national ED growth, known at the cutoff
         ed = pd.read_csv(spec["ed_file"], parse_dates=["date"]).set_index("date").ed
         v = np.log(ed[:pd.Timestamp(cut)].iloc[-3:].to_numpy() + 0.05)
         c = float(np.clip(np.exp(np.polyfit(np.arange(3), v, 1)[0] / WEEKLY_GROWTH_PER_LOG_R), 0.95, 1.5))
