@@ -10,7 +10,7 @@
   --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
   --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
   --s-forecast: #1c5cab; --band-95: #cde2fb; --band-50: #86b6ef;
-  --s-nowcast: #eb6834; --s-observed: #0b0b0b; --s-previous: #898781;
+  --s-nowcast: #eb6834; --s-observed: #0b0b0b; --s-previous: #898781; --s-compare: #7d3fc4;
   --div-neg-2: #2a78d6; --div-neg-1: #86b6ef; --div-mid: #c3c2b7; --div-pos-1: #ef9a9a; --div-pos-2: #e34948;
   --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
 }
@@ -20,7 +20,7 @@
     --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
     --s-forecast: #9ec5f4; --band-95: #0d366b; --band-50: #1c5cab;
-    --s-nowcast: #d95926; --s-observed: #f0efec; --s-previous: #898781;
+    --s-nowcast: #d95926; --s-observed: #f0efec; --s-previous: #898781; --s-compare: #b48af0;
     --div-neg-2: #3987e5; --div-neg-1: #1c5cab; --div-mid: #383835; --div-pos-1: #9e3a3a; --div-pos-2: #e66767;
   }
 }
@@ -29,7 +29,7 @@
   --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
   --s-forecast: #9ec5f4; --band-95: #0d366b; --band-50: #1c5cab;
-  --s-nowcast: #d95926; --s-observed: #f0efec; --s-previous: #898781;
+  --s-nowcast: #d95926; --s-observed: #f0efec; --s-previous: #898781; --s-compare: #b48af0;
   --div-neg-2: #3987e5; --div-neg-1: #1c5cab; --div-mid: #383835; --div-pos-1: #9e3a3a; --div-pos-2: #e66767;
 }
 * { box-sizing: border-box; }
@@ -91,6 +91,7 @@ button.theme { margin-left: auto; font: inherit; font-size: 12px; background: no
 <header>
   <h1>FLUFFHEAD forecast review</h1>
   <div class="sub" id="meta"></div>
+  <div class="sub" id="variant" hidden></div>
   <button class="theme" id="theme" type="button">Theme</button>
 </header>
 <nav role="tablist" id="tabs"></nav>
@@ -184,6 +185,7 @@ function fanChart(host, loc, { height = 300, mini = false, from = null } = {}) {
   const obs = L.observed, b = L.bands;
   const now = Object.fromEntries((L.nowcast || []).map(n => [n.date, n]));
   const prevPts = Object.entries(L.previous || {}).map(([h, v]) => [addWeeks(D.ref_date, +h), v]).filter(([d]) => weeks.includes(d));
+  const cmpPts = Object.entries(L.compare || {}).filter(([h]) => +h >= 0).map(([h, v]) => [addWeeks(D.ref_date, +h), v]).filter(([d]) => weeks.includes(d));
   let ymax = 1;
   for (const i of idx) { ymax = Math.max(ymax, obs[i] || 0, b["0.975"][i] || 0); }
   for (const n of Object.values(now)) ymax = Math.max(ymax, n.reported || 0, n.median || 0);
@@ -225,6 +227,10 @@ function fanChart(host, loc, { height = 300, mini = false, from = null } = {}) {
     const d = prevPts.map(([dt, v], k) => `${k ? "L" : "M"}${x(weeks.indexOf(dt))},${y(v)}`).join("");
     svg.append(sv("path", { d, fill: "none", stroke: "var(--s-previous)", "stroke-width": 2, "stroke-dasharray": "5 4" }));
   }
+  if (cmpPts.length) {
+    const d = cmpPts.map(([dt, v], k) => `${k ? "L" : "M"}${x(weeks.indexOf(dt))},${y(v)}`).join("");
+    svg.append(sv("path", { d, fill: "none", stroke: "var(--s-compare)", "stroke-width": 2, "stroke-dasharray": "2 3", "stroke-linecap": "round" }));
+  }
   for (const n of Object.values(now)) {
     const i = weeks.indexOf(n.date); if (i < i0) continue;
     if (n.reported != null && !mini) svg.append(sv("circle", { cx: x(i), cy: y(n.reported), r: 4, fill: "var(--surface)", stroke: "var(--s-observed)", "stroke-width": 2 }));
@@ -248,6 +254,7 @@ function fanChart(host, loc, { height = 300, mini = false, from = null } = {}) {
       add("forecast median", b["0.5"][i]);
       if (b["0.025"][i] != null) add(`95% range ${fmt(b["0.025"][i])}–`, b["0.975"][i]);
       const pv = prevPts.find(([d]) => d === weeks[i]); if (pv) add("last week's median", pv[1]);
+      const cv = cmpPts.find(([d]) => d === weeks[i]); if (cv) add((D.compare_label || "comparison").toLowerCase(), cv[1]);
       tip.style.display = "block";
       const left = (x(i) / W) * r.width;
       tip.style.left = Math.min(left + 12, r.width - tip.offsetWidth - 4) + "px"; tip.style.top = "8px";
@@ -262,6 +269,7 @@ function fanChart(host, loc, { height = 300, mini = false, from = null } = {}) {
     item("", "background: var(--band-50)", "50%");
     item("", "background: var(--band-95)", "95%");
     if (prevPts.length) item("line", "background: repeating-linear-gradient(90deg, var(--s-previous) 0 5px, transparent 5px 9px)", "Last week's median");
+    if (cmpPts.length) item("line", "background: repeating-linear-gradient(90deg, var(--s-compare) 0 2px, transparent 2px 5px)", D.compare_label || "Comparison");
     host.append(lg);
   }
   host.append(wrap);
@@ -344,6 +352,7 @@ function makeTable(host, cols, rows, onClick) {
 function overview() {
   const s = D.summary;
   $("#meta").textContent = `${D.model} · reference date ${D.ref_date} · data through ${D.last_obs} · generated ${D.generated}`;
+  if (D.variant) { const v = $("#variant"); v.textContent = D.variant; v.hidden = false; document.title = "FLUFFHEAD Momentum Alternate"; }
   const tiles = $("#tiles"); tiles.innerHTML = "";
   const us = byLoc["US"];
   const tile = (v, k) => { const t = el("div", { class: "tile" }); t.append(el("div", { class: "v" }, v), el("div", { class: "k" }, k)); tiles.append(t); };

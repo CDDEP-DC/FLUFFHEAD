@@ -27,6 +27,7 @@ from __future__ import annotations
 import datetime as dt
 import io
 import json
+import time
 import logging
 from dataclasses import dataclass
 
@@ -276,9 +277,19 @@ def region_humidity(group: str, start: dt.date, days: int, today: dt.date | None
 
 
 def prefetch(groups: list[str]) -> None:
-    """Download station data for all regions (sequentially; workers then read the cache)."""
+    """Download station data for all regions (sequentially; workers then read the cache).
+
+    This year's observations are cached per day in cache/weather/<network>-<today>-...csv, so a
+    prefetch run earlier the same day (`fluffhead weather`, e.g. on the Mac before local/aws/pack.sh
+    uploads cache/) makes this a no-op. "Today" is the machine's local date: the AWS instance runs
+    with TZ=America/New_York so that it matches the Mac's."""
+    t0 = time.monotonic()
+    before = set((C.CACHE_DIR / "weather").glob(f"*-{dt.date.today()}-*.csv"))
     for g in groups:
         try:
             station_q(station_weights(g))
         except Exception as e:
             log.warning("%s: humidity prefetch failed (%s)", g, e)
+    after = set((C.CACHE_DIR / "weather").glob(f"*-{dt.date.today()}-*.csv"))
+    log.info("humidity prefetch for %s: %d regions, %d station sets downloaded, %d already cached (%.0f s)",
+             dt.date.today(), len(groups), len(after - before), len(before), time.monotonic() - t0)

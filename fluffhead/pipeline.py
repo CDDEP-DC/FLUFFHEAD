@@ -16,6 +16,8 @@
               its imports following it. The fits are kept (imports before the cutoff come
               from data); pass-1 outputs move to regions/pass1/.
     combine   regions -> states -> US, then the submission file and its checks
+    alternate the same samples with the momentum correction (momentum.py), written to
+              forecasts/alternates/momentum/ with its own review report; never submitted
 """
 from __future__ import annotations
 
@@ -57,6 +59,7 @@ class WeekData:
     nowcasts: pd.DataFrame       # flusight-fm nowcast table (mu, sd on log(x + 1))
     warnings: list
     activity: pd.DataFrame       # [weeks, county FIPS] NSSP flu ED activity (empty: population shares)
+    reported: pd.DataFrame | None = None   # hub data as posted (before the nowcast), through last_obs
 
 
 def reference_date_for(day: dt.date) -> dt.date:
@@ -102,7 +105,7 @@ def load_week(ref_date: dt.date, nowcast: bool = True) -> WeekData:
         warnings.append("NSSP ED data unavailable: regions get population shares of their states")
     elif activity.index.max() < last_obs:
         warnings.append(f"NSSP ED data end {activity.index.max().date()}; later weeks reuse the last shares")
-    return WeekData(ref_date, last_obs, locations, rev, table, warnings, activity)
+    return WeekData(ref_date, last_obs, locations, rev, table, warnings, activity, cur)
 
 
 # ------------------------------------------------------------------ regions
@@ -344,7 +347,9 @@ def run_regions(wk: WeekData, groups: list[str], workers: int, n_draws: int, n_k
 
 
 # ------------------------------------------------------------------ combine
-def combine(wk: WeekData, region_dir: Path, seed: int = 7):
+def combine(wk: WeekData, region_dir: Path, seed: int = 7, adjust=None):
+    """adjust(states, weeks) -> states, if given, changes the state samples before noise and targets
+    (the momentum alternate); with the same seed the noise draws are the same as without it."""
     rng = np.random.default_rng(seed)
     weeks = S.season_weeks(dt.date(wk.ref_date.year if wk.ref_date.month >= 8 else wk.ref_date.year - 1, 8, 1),
                            C.SEASON_END)
@@ -360,6 +365,8 @@ def combine(wk: WeekData, region_dir: Path, seed: int = 7):
     picks = S.joint_samples(weekly, window, rng)
     states = S.state_samples(weekly, pieces, shares, act, picks, wk.revised, weeks, wk.locations,
                              wk.last_obs.date(), rng)
+    if adjust is not None:
+        states = adjust(states, weeks)
     locs = wk.locations[wk.locations.location.isin(list(states) + ["US"])]
     juris = [l for l in wk.locations.location if l != "US"]
     df, noisy = S.build(states, weeks, wk.revised, wk.nowcasts, locs, wk.ref_date, rng, juris)
@@ -382,8 +389,53 @@ def run(ref_date: dt.date, groups: list[str] | None = None, workers: int = 4, n_
     from . import report
     report_path = report.write(wk, df, noisy, weeks, problems, region_dir)
     log.info("report: %s", report_path)
+    from . import momentum
+    if momentum.ENABLED:
+        try:
+            alternate(wk, region_dir, df)
+        except Exception:                 # the alternate must never stop the main forecast
+            log.exception("momentum alternate failed")
     for p in problems:
         log.error("validation: %s", p)
     if absent:
         log.warning("no forecast for %s (no simulated groups)", ", ".join(absent))
     return wk, df, noisy, weeks, problems, path
+
+
+# ------------------------------------------------------------------ alternate
+def alternate(wk: WeekData, region_dir: Path, main: pd.DataFrame | None = None) -> Path:
+    """The momentum-corrected alternate: submission-format file, shifts, and review report (with the
+    main forecast's medians for comparison). Re-run it after Wednesday's NSSP release if the main
+    run came earlier (fluffhead alternate)."""
+    from . import momentum as M
+    from . import report
+    from .calibrate import season_start
+    if main is None:
+        main = pd.read_csv(C.FORECAST_DIR / "model-output" / C.model_id() / f"{wk.ref_date}-{C.model_id()}.csv",
+                           dtype={"location": str, "output_type_id": str})
+    coef = M.coefficients()
+    nssp = ED.fetch(season_start(wk.last_obs.date()), wk.last_obs.date())
+    ed = M.state_ed(nssp)
+    reported = wk.reported if wk.reported is not None else D.load_current("hosp")
+    reported = reported[reported.date <= wk.last_obs]
+    x = M.inputs(reported, ed, wk.last_obs)
+    last = wk.revised[wk.revised.date == wk.last_obs].set_index("location").value.to_dict()
+    applied = {}
+
+    def adjust(states, weeks):
+        applied.update(M.shifts(states, weeks, wk.last_obs, last, x, coef))
+        return M.apply(states, weeks, wk.last_obs, applied)
+
+    df, noisy, weeks, problems, absent = combine(wk, region_dir, adjust=adjust)
+    M.OUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = M.OUT_DIR / f"{wk.ref_date}-{C.model_id()}.csv"
+    df.to_csv(path, index=False)
+    ed_last = ed.date.max() if len(ed) else None
+    info = {"ref_date": str(wk.ref_date), "last_obs": str(wk.last_obs.date()),
+            "ed_through": None if ed_last is None else str(pd.Timestamp(ed_last).date()),
+            "generated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "coefficients": coef,
+            "inputs": x, "shifts": applied}
+    (M.OUT_DIR / f"{wk.ref_date}-shifts.json").write_text(json.dumps(info, indent=1))
+    rp = report.write_alternate(wk, df, noisy, weeks, problems, region_dir, main, info)
+    log.info("momentum alternate: %s (%d states corrected); report %s", path, len(applied), rp)
+    return path

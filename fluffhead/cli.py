@@ -9,6 +9,10 @@ Setup (once, or when region rules change):
 Weekly:
     fluffhead forecast       nowcast, fit and forecast every built group, write the submission
     fluffhead report         re-render a week's review report from its saved data
+    fluffhead alternate      (re)write the momentum-corrected alternate and its report from the
+                             week's saved regions, e.g. after Wednesday's NSSP release
+    fluffhead weather        download today's station humidity for every region into cache/weather
+                             (local/aws/pack.sh runs it, so the AWS instance doesn't wait on it)
 
 Calibration:
     fluffhead hindcast       fit past seasons per region; sets the immunity prior (hindcast.py)
@@ -138,6 +142,24 @@ def cmd_report(args) -> int:
     return 0
 
 
+def cmd_alternate(args) -> int:
+    from . import pipeline as P
+    ref = args.reference_date or P.reference_date_for(dt.date.today())
+    region_dir = P.RUNS_DIR / str(ref) / "regions"
+    if not any(region_dir.glob("*.npz")):
+        print(f"no region results in {region_dir}; run `fluffhead forecast` first")
+        return 1
+    wk = P.load_week(ref, nowcast=not args.no_nowcast)
+    print(f"alternate: {P.alternate(wk, region_dir)}")
+    return 0
+
+
+def cmd_weather(args) -> int:
+    from . import pipeline as P, weather as W
+    W.prefetch(args.groups or P.built_groups())
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="fluffhead", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -196,6 +218,13 @@ def main(argv=None) -> int:
     p = sub.add_parser("report")
     p.add_argument("--reference-date", type=_date)
     p.set_defaults(fn=cmd_report)
+    p = sub.add_parser("alternate")
+    p.add_argument("--reference-date", type=_date)
+    p.add_argument("--no-nowcast", action="store_true")
+    p.set_defaults(fn=cmd_alternate)
+    p = sub.add_parser("weather")
+    p.add_argument("--groups", nargs="*")
+    p.set_defaults(fn=cmd_weather)
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")

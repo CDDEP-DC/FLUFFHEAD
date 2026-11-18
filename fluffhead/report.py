@@ -186,3 +186,58 @@ def write(wk, df, noisy, weeks, problems, region_dir: Path) -> Path:
     d.mkdir(parents=True, exist_ok=True)
     (d / f"{wk.ref_date}-data.json").write_text(json.dumps(payload, default=str))
     return render(payload, d / f"{wk.ref_date}-report.html")
+
+
+def _medians(df: pd.DataFrame) -> dict:
+    m = df[(df.target == C.HOSP_TARGET) & (df.output_type == "quantile") & (df.output_type_id.astype(str) == "0.5")]
+    return {loc: {int(h): _r(v) for h, v in zip(g.horizon, g.value)} for loc, g in m.groupby("location")}
+
+
+def write_alternate(wk, df, noisy, weeks, problems, region_dir: Path, main: pd.DataFrame, info: dict) -> Path:
+    """Review report for the momentum alternate (momentum.py): the same page, the alternate's fan, the
+    main forecast's medians as a comparison line, and checks saying where the correction applied."""
+    from . import momentum as M
+    payload = build_data(wk, df, noisy, weeks, problems, region_dir)
+    locs = wk.locations.set_index("location")
+    name = lambda l: locs.loc[l, "location_name"] if l in locs.index else l
+    main_med = _medians(main)
+    prev_f = M.OUT_DIR / f"{wk.ref_date - dt.timedelta(weeks=1)}-{C.model_id()}.csv"
+    prev = _medians(pd.read_csv(prev_f, dtype={"location": str, "output_type_id": str})) if prev_f.exists() else {}
+    for L in payload["locations"]:
+        L["compare"] = main_med.get(L["location"], {})
+        L["previous"] = prev.get(L["location"], {})
+    sh = info["shifts"]
+    states = [l for l in noisy if l != "US"]
+    checks = []
+    if not sh:
+        checks.append({"level": "warning", "text": f"No state corrected: NSSP ED data run through {info['ed_through']}, not the last "
+                       f"reported week ({info['last_obs']}). This page equals the main forecast. Re-run `fluffhead alternate` "
+                       "after Wednesday's NSSP release."})
+    else:
+        checks.append({"level": "info", "text": f"Momentum correction applied to {len(sh)} of {len(states)} states (ED and admissions "
+                       f"through {info['last_obs']}); the US is their sum. Shifts are capped at ×{np.exp(M.CAP):.2f}."})
+        left = sorted(set(states) - set(sh))
+        small = [l for l in left if l in info["inputs"]]
+        nodata = [l for l in left if l not in info["inputs"]]
+        if small:
+            checks.append({"level": "info", "text": f"Not corrected, fewer than {M.MIN_ADMISSIONS} admissions last week: "
+                           + ", ".join(name(l) for l in small)})
+        if nodata:
+            checks.append({"level": "info", "text": "Not corrected, ED or admissions missing for a recent week: "
+                           + ", ".join(name(l) for l in nodata)})
+        big = sorted(sh.items(), key=lambda kv: -abs(kv[1][-1]))[:10]
+        for loc, s in big:
+            x = info["inputs"][loc]
+            g = lambda v: f"{(np.exp(v) - 1) * 100:+.0f}%"
+            checks.append({"level": "info", "text": f"{name(loc)}: forecast ×{np.exp(-s[0]):.2f} this week, ×{np.exp(-s[-1]):.2f} "
+                           f"in 3 weeks. Weekly growth over the last two weeks: ED {g(x['ed'])} (a week earlier "
+                           f"{g(x['ed'] - x['ed_acc'])}), admissions {g(x['adm'])} (a week earlier {g(x['adm'] - x['adm_acc'])})"})
+    payload["checks"] = checks + payload["checks"]
+    payload["model"] = f"{C.model_id()} + momentum correction"
+    payload["variant"] = ("Alternate forecast, not submitted: the main forecast shifted by how far each state's flu ED visits "
+                          "lead its admissions (momentum.py). The dashed purple line is the main forecast's median.")
+    payload["compare_label"] = "Main forecast median"
+    d = C.FORECAST_DIR / "reports"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{wk.ref_date}-momentum-data.json").write_text(json.dumps(payload, default=str))
+    return render(payload, d / f"{wk.ref_date}-momentum-report.html")

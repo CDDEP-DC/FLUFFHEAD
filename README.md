@@ -60,6 +60,14 @@ Run this after the hub's target data updates on Wednesday. Output goes to `forec
 
 Finished regions are skipped, so an interrupted run resumes. Move `runs/<date>/` aside to start a date over.
 
+**Momentum alternate (trial, not submitted).** Each run also writes a second forecast from the same samples. It shifts each state's forecast by how far its flu ED visits lead its admissions (`fluffhead/momentum.py`). In backtests, this cut the error at peaks and declines by about a quarter. The file is `forecasts/alternates/momentum/<date>-OHTJHU-FLUFFHEAD.csv` and the review report is `forecasts/reports/<date>-momentum-report.html`, which also shows the main median for comparison. A state is corrected only when its ED data include the last reported week and it had at least 20 admissions. NSSP posts on Wednesday mornings, so a run before then corrects nothing. In that case, rerun just the alternate afterwards (it takes seconds):
+
+```bash
+python -m fluffhead alternate --reference-date 2026-11-21
+```
+
+To submit the alternate instead of the main forecast, copy its file over the one in `forecasts/model-output/`.
+
 ## Layout
 
 | Path | Contents |
