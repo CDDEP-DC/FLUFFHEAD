@@ -23,7 +23,9 @@ each a normal distribution on log(value + offset):
    counts grow like count^0.8: less than proportionally, at every size.
    See `flusight revisions` for the analysis behind these choices.
 2. Our own earlier forecast for that week (from last week's submission), if
-   there is one. It is weighted by precision and scaled by PRIOR_WEIGHT.
+   there is one. It is weighted by precision and scaled by PRIOR_WEIGHT. Off (0) since
+   Nov 2026: in replays a forecast prior, even the FluSight ensemble's, did not improve the
+   nowcast, and our own forecast pulled it toward our errors.
 
 The models are then run on the series with these weeks replaced by the nowcast
 medians, and horizon -1 is submitted from the nowcast distribution.

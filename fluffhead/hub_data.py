@@ -97,10 +97,25 @@ def _commits(path: str, since: str) -> list[tuple[str, str]]:
         page += 1
 
 
+def _eastern_date(committed_utc: str) -> dt.date:
+    return (pd.Timestamp(committed_utc) - pd.Timedelta(hours=5)).date()  # ignores DST; close enough
+
+
 def availability_date(committed_utc: str) -> dt.date:
-    """Reference date of the first submission that could have used data committed at this time."""
-    eastern = (pd.Timestamp(committed_utc) - pd.Timedelta(hours=5)).date()  # ignores DST; close enough
-    return reference_date_for(eastern + dt.timedelta(days=3))
+    """Reference date of the first submission that could have used data committed at this time,
+    on the usual schedule (data by Wednesday). See version_dates for late weeks."""
+    return reference_date_for(_eastern_date(committed_utc) + dt.timedelta(days=3))
+
+
+def version_dates(committed_utc: list[str]) -> list[dt.date]:
+    """Reference date for each commit time. As availability_date, except that a Thursday or Friday
+    commit in a week with no commit from Sunday to Wednesday is that week's late release (e.g.
+    Veterans Day 2026, when the hub posted Thursday and moved the deadline), so it is dated to that
+    week's Saturday rather than the next one."""
+    days = [_eastern_date(str(t)) for t in committed_utc]
+    on_time = {reference_date_for(d) for d in days if d.weekday() in (6, 0, 1, 2)}
+    return [reference_date_for(d) if d.weekday() in (3, 4) and reference_date_for(d) not in on_time
+            else availability_date(str(t)) for d, t in zip(days, committed_utc)]
 
 
 def load_versions(key: str, since: str | None = None) -> list[tuple[str, pd.Timestamp, pd.DataFrame]]:
@@ -135,7 +150,8 @@ def load_versions(key: str, since: str | None = None) -> list[tuple[str, pd.Time
 
 def load_vintages(key: str, since: str | None = None) -> dict[dt.date, pd.DataFrame]:
     """One version of a target data file per reference date: the last one committed before that week's deadline."""
-    out = {availability_date(str(when)): df for _, when, df in load_versions(key, since or C.REVISION_START)}
+    versions = load_versions(key, since or C.REVISION_START)
+    out = dict(zip(version_dates([str(when) for _, when, _ in versions]), (df for _, _, df in versions)))
     log.info("Loaded %d versions of %s target data", len(out), key)
     return dict(sorted(out.items()))
 

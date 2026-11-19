@@ -72,7 +72,7 @@ REVISION_SETTLE_WEEKS = 4
 REVISION_SHRINK = 5.0
 REVISION_MIN_SD = 0.01
 NOWCAST_FALLBACK_SD = 0.05
-PRIOR_WEIGHT = 1.0
+PRIOR_WEIGHT = 0.0     # weight on our own earlier forecast in the nowcast; 0 since 2026-11 (no gain in replays)
 LOG_OFFSET = 1.0
 
 # --------------------------------------------------------------- targets
