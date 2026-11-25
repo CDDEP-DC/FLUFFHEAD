@@ -195,11 +195,12 @@ class Region:
     start: dt.date
     days: int
     main_state: str
-    pieces: list                 # state FIPS per piece
+    pieces: list                 # state FIPS per piece (FLUFFHEADMetro: hub location per piece)
     piece_of: np.ndarray         # int8 per person: piece of a resident's county, -1 otherwise
     piece_scale: np.ndarray      # people represented per model resident, per piece
     piece_share: np.ndarray      # piece population / state population
     pool: EdgePool
+    piece_state: list | None = None   # state FIPS of each piece (None: the pieces are states)
     base: DiseaseParams = field(default_factory=DiseaseParams)
     activity_share: pd.DataFrame | None = None   # [season weeks, pieces] share of state flu activity
     humidity: W.Humidity | None = None           # daily specific humidity
@@ -238,19 +239,30 @@ def setup(group: str, net: Network, ref_date: dt.date, horizon_end: dt.date, loc
     counties = pd.read_csv(C.REGIONS_DIR / "counties.csv", dtype={"fips": str, "state": str}, keep_default_na=False)
     mine = counties[counties.group == group]
     state_pop2019 = counties.groupby("state")["pop"].sum()
-    pieces = sorted(mine.state.unique())
+    # a piece is the group's part of one state, or (FLUFFHEADMetro, counties.csv has `piece`) one hub location
+    piece_col = "piece" if "piece" in mine.columns else "state"
+    pieces = sorted(mine[piece_col].unique())
+    state_of = mine.groupby(piece_col).state.first()
     pidx = {s: i for i, s in enumerate(pieces)}
-    cstate = np.array([c[:2] for c in net.counties])
-    piece_of = np.array([pidx.get(s, -1) for s in cstate], np.int8)[net.county]
+    if piece_col == "state":     # by state code (2023 networks use Connecticut's new county codes)
+        cpiece = [c[:2] for c in net.counties]
+    else:
+        by_county = mine.set_index("fips")[piece_col]
+        cpiece = [by_county.get(c[:5], "") for c in net.counties]
+    piece_of = np.array([pidx.get(p, -1) for p in cpiece], np.int8)[net.county]
     piece_of[~net.resident] = -1
+    unmapped = (piece_of[net.resident] < 0).mean()
+    if unmapped > 0.001:
+        log.warning("%s: %.1f%% of residents are in counties outside the group's pieces", group, 100 * unmapped)
     # people per model resident: current hub population of the piece / model residents in it
     hubpop = locations.set_index("location")["population"]
     scale, share = [], []
     for s in pieces:
-        piece_pop2019 = mine[mine.state == s]["pop"].sum()
-        sh = piece_pop2019 / state_pop2019[s]
+        st = state_of[s]
+        piece_pop2019 = mine[mine[piece_col] == s]["pop"].sum()
+        sh = piece_pop2019 / state_pop2019[st]
         share.append(sh)
-        scale.append(sh * hubpop.get(s, state_pop2019[s]) / max((piece_of == pidx[s]).sum(), 1))
+        scale.append(sh * hubpop.get(st, state_pop2019[st]) / max((piece_of == pidx[s]).sum(), 1))
     start = season_start(ref_date)
     days = (horizon_end - start).days + 1
     main = mine.groupby("state")["pop"].sum().idxmax()
@@ -259,8 +271,9 @@ def setup(group: str, net: Network, ref_date: dt.date, horizon_end: dt.date, loc
     if activity is not None and not activity.empty:
         first = start + dt.timedelta(days=(5 - start.weekday()) % 7)
         weeks = pd.date_range(first, horizon_end, freq="W-SAT")
-        act_share = pd.DataFrame(ED.piece_shares(activity, [list(mine[mine.state == s].fips) for s in pieces],
-                                                 pieces, weeks, np.array(share)), index=weeks, columns=pieces)
+        act_share = pd.DataFrame(ED.piece_shares(activity, [list(mine[mine[piece_col] == s].fips) for s in pieces],
+                                                 [state_of[s] for s in pieces], weeks, np.array(share)),
+                                 index=weeks, columns=pieces)
         log.info("%s: share of state flu activity (ED-weighted / population): %s", group,
                  ", ".join(f"{s} {a:.3f}/{p:.3f}" for s, a, p in zip(pieces, act_share.iloc[-1], share)))
     try:
@@ -283,7 +296,8 @@ def setup(group: str, net: Network, ref_date: dt.date, horizon_end: dt.date, loc
     return Region(group, net, start, days, main, pieces, piece_of, np.array(scale), np.array(share),
                   EdgePool.create(net, mode, net_seed), base=base, activity_share=act_share, humidity=humidity,
                   cutoff=ref_date, import_travel=travel, import_commute=commute, community_mult=cmult,
-                  scenario=scenario)
+                  scenario=scenario,
+                  piece_state=None if piece_col == "state" else [state_of[s] for s in pieces])
 
 
 def region_prior(region: Region, immune_scale: tuple = (0.5, 1.5)) -> Prior:
@@ -300,9 +314,11 @@ def region_prior(region: Region, immune_scale: tuple = (0.5, 1.5)) -> Prior:
 
 def targets(region: Region, observed: pd.DataFrame, cutoff: dt.date) -> pd.DataFrame:
     """Weekly target per piece: state admissions x the piece's share of the state's flu activity."""
-    obs = observed[(observed.location.isin(region.pieces)) & (observed.date >= pd.Timestamp(region.start))
+    states = region.piece_state or region.pieces
+    obs = observed[(observed.location.isin(states)) & (observed.date >= pd.Timestamp(region.start))
                    & (observed.date <= pd.Timestamp(cutoff))]
-    w = obs.pivot_table(index="date", columns="location", values="value").reindex(columns=region.pieces)
+    w = obs.pivot_table(index="date", columns="location", values="value").reindex(columns=states)
+    w.columns = region.pieces
     return w * region.shares_for(w.index)
 
 
@@ -873,6 +889,8 @@ def forecast(region: Region, fit_: Fit, national: pd.Series, n_cont: int = 5, se
     day_cut = (fit_.cutoff - region.start).days + 1
     bg = (fit_.baseline if fit_.baseline is not None else np.zeros(len(region.pieces))) / 7   # per day
     rows = list(fit_.kept.itertuples())
+    # by column, not attribute: FLUFFHEADMetro's piece names (hub locations) can contain "-"
+    mults = fit_.kept[[f"mult_{p}" for p in region.pieces]].to_numpy(float)
     jobs = []                    # (kept draw, continuation, humidity path, seed after the cutoff), drawn in order
     for i in range(len(rows)):
         for c in range(n_cont):
@@ -883,7 +901,7 @@ def forecast(region: Region, fit_: Fit, national: pd.Series, n_cont: int = 5, se
     def one(j):
         i, c, q, s = jobs[j]
         t = rows[i]
-        mult = np.array([getattr(t, f"mult_{p}") for p in region.pieces])
+        mult = mults[i]
         sim = make_sim(region, t, pressure, int(t.seed), q)
         advance(region, sim, t, pressure, day_cut, day_cut)
         sim.reseed(s)

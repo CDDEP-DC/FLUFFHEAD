@@ -50,7 +50,7 @@ MIN_HALF_WIDTH = 0.2
 INFORMATIVE_SD = 0.3             # prior sd of uniform(0.2, 1.8) is 0.46
 MIN_PHI = 0.1
 FLAT_HALF_LIFE = 1e6             # weeks: every week of the season counts equally
-RUNS = C.REPO / "runs"
+RUNS = C.RUNS_DIR
 
 
 def out_dir(season: int) -> Path:

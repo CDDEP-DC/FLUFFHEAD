@@ -13,10 +13,14 @@ data/raw/
 work/
 data/regions/*/network/
 data/regions/*/network-*/
+data/regions-local/*/network/
+data/regions-local/*/network-*/
 
 # simulation outputs: keep summaries only
 runs/*/*
 !runs/*/summary/
+runs-local/*/*
+!runs-local/*/summary/
 
 .env
 .venv-greasypop/

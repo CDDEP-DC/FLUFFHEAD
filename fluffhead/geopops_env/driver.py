@@ -42,7 +42,9 @@ TRAITS = ["sch_public", "sch_private", "female", "race_black_alone", "white_non_
 
 
 def config(path, spec):
-    cfg = load_config()                     # the package's shipped defaults
+    # the package's shipped defaults; not load_config(), which reads the package's config.json,
+    # a file the download stage rewrites (concurrent builds read it half-written)
+    cfg = json.loads((pathlib.Path(geopops.__file__).parent / "config_defaults.json").read_text())
     year = int(spec["main_year"])
     cfg.update(path=str(path), main_year=year, decennial_year=2020 if year >= 2020 else 2010,
                geos=spec["geos"], commute_states=spec["commute_states"], use_pums=spec["use_pums"],
@@ -55,7 +57,10 @@ def main():
     path.mkdir(parents=True, exist_ok=True)
     cfg = config(path, spec)
     # pull_census_data and geocorr_files read the package's own config.json (for main_year)
-    written = [pathlib.Path(geopops.__file__).parent / "config.json", path / "config.json"]
+    # (download only: process_data takes cfg directly, and builds run many at once)
+    written = [path / "config.json"]
+    if stage == "download":
+        written.insert(0, pathlib.Path(geopops.__file__).parent / "config.json")
     for p in written:
         save_config(cfg, str(p), sanitize=True)
     key = os.environ.get("CENSUS_API_KEY", "")

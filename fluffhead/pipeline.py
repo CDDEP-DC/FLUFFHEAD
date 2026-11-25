@@ -46,7 +46,7 @@ from . import submission as S
 from . import weather as W
 
 log = logging.getLogger(__name__)
-RUNS_DIR = C.REPO / "runs"
+RUNS_DIR = C.RUNS_DIR
 INFECTION_LAG_DAYS = 7          # national_path: admissions lag infections about this long
 
 
@@ -283,8 +283,13 @@ def second_pass(wk: WeekData, out_dir: Path, groups: list[str], workers: int, n_
                 scenario: ST.Scenario | None = None, draw_workers: int = 1, order: str = "largest") -> None:
     done = lambda g: (out_dir / f"{g}.json").exists() and json.loads((out_dir / f"{g}.json").read_text()).get("pass") == 2
     saved = out_dir / "national_path.npy"
+    main = C.REPO / "runs" / str(wk.ref_date) / "regions" / "national_path.npy"
     if saved.exists():           # resuming: the curve pass 2 started with
         path = np.load(saved)
+    elif C.LOCAL and main.exists():   # FLUFFHEADMetro covers part of the country: main FLUFFHEAD's curve
+        path = np.load(main)
+        np.save(saved, path)
+        log.info("pass 2: national curve from main FLUFFHEAD (%s)", main)
     else:
         path = national_path(out_dir, wk.last_obs.date(),
                              replace={f.stem: f for f in (out_dir / "pass1").glob("*.npz")})   # pass-1 files
@@ -365,6 +370,9 @@ def combine(wk: WeekData, region_dir: Path, seed: int = 7, adjust=None):
     picks = S.joint_samples(weekly, window, rng)
     states = S.state_samples(weekly, pieces, shares, act, picks, wk.revised, weeks, wk.locations,
                              wk.last_obs.date(), rng)
+    if adjust is None and not C.LOCAL:     # FLUFFHEADMetro makes its state forecasts from these (local.py)
+        np.savez_compressed(region_dir.parent / "state-samples.npz", weeks=weeks.values,
+                            **{s: v.astype(np.float32) for s, v in states.items()})
     if adjust is not None:
         states = adjust(states, weeks)
     locs = wk.locations[wk.locations.location.isin(list(states) + ["US"])]
@@ -384,6 +392,10 @@ def run(ref_date: dt.date, groups: list[str] | None = None, workers: int = 4, n_
     region_dir = run_regions(wk, groups, workers, n_draws, n_keep, n_cont, scenario, draw_workers, order)
     if two_pass:
         second_pass(wk, region_dir, groups, workers, n_keep, n_cont, scenario, draw_workers, order)
+    if C.LOCAL:                  # FLUFFHEADMetro: the Flu MetroCast file instead (local.py)
+        from . import local
+        path, problems = local.write(ref_date, region_dir)
+        return wk, None, None, None, problems, path
     df, noisy, weeks, problems, absent = combine(wk, region_dir)
     path = S.save(df, ref_date)
     from . import report

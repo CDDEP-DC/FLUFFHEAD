@@ -45,6 +45,15 @@ def _get(url: str, **kwargs) -> requests.Response:
     raise AssertionError("unreachable")
 
 
+def _write_atomic(path, text: str) -> None:
+    """Write via a temporary file and rename, so processes reading the cache at the same time
+    (parallel backtest cases each refresh locations.csv) never see it half-written."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def _read_target_csv(text_or_path) -> pd.DataFrame:
     src = io.StringIO(text_or_path) if isinstance(text_or_path, str) and "\n" in text_or_path else text_or_path
     df = pd.read_csv(src, dtype={"location": str}, parse_dates=["date"])
@@ -55,8 +64,7 @@ def load_locations() -> pd.DataFrame:
     path = C.CACHE_DIR / "locations.csv"
     try:
         text = _get(C.hub_raw(C.LOCATIONS_PATH)).text
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
+        _write_atomic(path, text)
     except requests.RequestException:
         if not path.exists():
             raise
@@ -69,8 +77,7 @@ def load_current(key: str) -> pd.DataFrame:
     path = C.CACHE_DIR / "current" / f"{key}.csv"
     try:
         text = _get(C.hub_raw(C.TARGET_PATHS[key])).text
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
+        _write_atomic(path, text)
     except requests.RequestException:
         if not path.exists():
             raise
@@ -128,7 +135,7 @@ def load_versions(key: str, since: str | None = None) -> list[tuple[str, pd.Time
     index = d / "commits.json"
     try:
         commits = _commits(path, since)
-        index.write_text(json.dumps(commits))
+        _write_atomic(index, json.dumps(commits))
     except requests.RequestException as e:
         log.warning("Could not list hub commits for %s (%s); using cached list", path, e)
         commits = json.loads(index.read_text()) if index.exists() else []

@@ -405,6 +405,17 @@ function generate_jobs_and_workers()
 
     ## mean and sd of ln(workplace size) for each county
     county_stats = read_county_stats()
+    ## counties absent from CBP (no published establishments, e.g. King County TX, pop 272):
+    ##  use the mean of the other counties' stats, so their few workplaces still get sizes
+    missing_co = [String7(k) for k in counties if !haskey(county_stats, String7(k))]
+    if !isempty(missing_co)
+        known = collect(values(county_stats))
+        fill_v = (sum(first.(known)) / length(known), sum(last.(known)) / length(known))
+        for k in missing_co
+            county_stats[k] = fill_v
+        end
+        println("warning: no CBP employer sizes for counties ", join(missing_co, " "), "; using the group mean")
+    end
     ## adjust stats
     ##  slightly overproduces large employers compared to CBP stats
     ##  (but unlisted employers should probably skew large)

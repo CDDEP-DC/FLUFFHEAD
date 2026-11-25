@@ -79,7 +79,7 @@ def _centroids() -> pd.DataFrame:
 
 def links(origin: str) -> pd.DataFrame:
     """Per group: air share, drive term and link to `origin` (cached)."""
-    path = DB1B_DIR / f"links_{origin}_{DB1B_QUARTER}.csv"
+    path = DB1B_DIR / f"links_{origin}_{DB1B_QUARTER}{C.SUFFIX}.csv"
     if path.exists():
         return pd.read_csv(path, index_col=0)
     from .weather import _km

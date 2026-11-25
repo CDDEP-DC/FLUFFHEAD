@@ -1,0 +1,47 @@
+ccn,name,city,county_fips,subtype,covid_admissions,flu_admissions_reported,weeks,share
+210009,"Johns Hopkins Hospital, The",BALTIMORE,24510,Short Term,1571,149,82,0.06308
+210044,Greater Baltimore Medical Center,BALTIMORE,24005,Short Term,1431,1500,82,0.05746
+210015,Medstar Franklin Square Medical Center,ROSEDALE,24005,Short Term,1179,294,82,0.04734
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,24045,Short Term,1151,425,82,0.04622
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,24027,Short Term,1138,61,82,0.04570
+210005,Frederick Health Hospital,FREDERICK,24021,Short Term,1113,0,82,0.04469
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,24003,Short Term,1069,164,82,0.04293
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,24510,Short Term,994,41,82,0.03991
+210004,Holy Cross Hospital,SILVER SPRING,24031,Short Term,920,331,82,0.03694
+210022,Suburban Hospital,BETHESDA,24031,Short Term,913,32,82,0.03666
+210001,Meritus Medical Center,HAGERSTOWN,24043,Short Term,893,217,82,0.03586
+210033,Carroll Hospital Center,WESTMINSTER,24013,Short Term,771,228,82,0.03096
+210011,Saint Agnes Hospital,BALTIMORE,24510,Short Term,747,252,82,0.03000
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,24031,Short Term,724,165,82,0.02907
+210018,Medstar Montgomery Medical Center,OLNEY,24031,Short Term,676,130,82,0.02715
+210056,Medstar Good Samaritan Hospital,BALTIMORE,24510,Short Term,618,221,82,0.02482
+210002,University Of Maryland Medical Center,BALTIMORE,24510,Short Term,603,125,82,0.02421
+210062,Medstar Southern Maryland Hospital Center,CLINTON,24033,Short Term,565,157,82,0.02269
+210027,UPMC Western Maryland,CUMBERLAND,24001,Short Term,554,116,82,0.02225
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,24003,Short Term,509,128,82,0.02044
+210024,Medstar Union Memorial Hospital,BALTIMORE,24510,Short Term,479,124,82,0.01923
+210012,Sinai Hospital Of Baltimore,BALTIMORE,24510,Short Term,474,227,82,0.01903
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,24037,Short Term,461,117,82,0.01851
+210034,Medstar Harbor Hospital,BALTIMORE,24510,Short Term,457,133,82,0.01835
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,24025,Short Term,444,141,82,0.01783
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,24033,Short Term,428,60,82,0.01719
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,24031,Short Term,402,132,82,0.01614
+210061,Atlantic General Hospital,BERLIN,24047,Short Term,390,90,82,0.01566
+210040,Northwest Hospital Center,RANDALLSTOWN,24005,Short Term,376,184,82,0.01510
+210039,Calverthealth Medical Center,PRINCE FREDERICK,24009,Short Term,373,138,82,0.01498
+210065,Holy Cross Germantown Hospital,GERMANTOWN,24031,Short Term,362,98,82,0.01454
+210008,Mercy Medical Center Inc,BALTIMORE,24510,Short Term,332,0,82,0.01333
+210063,University Of MD St Joseph Medical Center,TOWSON,24005,Short Term,299,89,82,0.01201
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,24033,Short Term,238,54,82,0.00956
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,24017,Short Term,217,33,82,0.00871
+210017,Garrett Regional Medical Center,OAKLAND,24023,Short Term,194,53,82,0.00779
+210032,Union Hospital Of Cecil County,ELKTON,24015,Short Term,156,52,82,0.00626
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,24033,Short Term,150,48,82,0.00602
+210037,University Of MD Shore Medical Center At Easton,EASTON,24041,Short Term,149,44,82,0.00598
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,24510,Short Term,113,26,82,0.00454
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,24510,Short Term,84,2,82,0.00337
+213300,Mount Washington Pediatric Hospital,BALTIMORE,24510,Childrens Hospitals,79,8,82,0.00317
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,24510,Short Term,40,2,82,0.00161
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,24025,Short Term,30,24,11,0.00120
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,24029,Short Term,24,10,82,0.00096
+213301,Kennedy Krieger Institute,BALTIMORE,24510,Childrens Hospitals,13,2,43,0.00052

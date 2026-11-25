@@ -1,0 +1,96 @@
+location,state_abb,location_name,location_type,state,pop2019,n_counties,group
+denver,CO,"Denver, CO",hsa_nci_id,08,2943519,11,loc-denver
+mesa,CO,"Mesa, CO",hsa_nci_id,08,293489,5,loc-mesa
+colorado-springs,CO,"Colorado Springs, CO",hsa_nci_id,08,760420,5,loc-colorado-springs
+weld,CO,"Weld, CO",hsa_nci_id,08,368487,4,loc-denver
+boulder,CO,"Boulder, CO",hsa_nci_id,08,396661,2,loc-denver
+larimer,CO,"Larimer, CO",hsa_nci_id,08,356899,1,loc-denver
+savannah,GA,"Savannah, GA",hsa_nci_id,13,510287,7,loc-savannah
+floyd,GA,"Floyd, GA",hsa_nci_id,13,331601,5,loc-marietta
+hall,GA,"Hall, GA",hsa_nci_id,13,396067,8,loc-henry
+marietta,GA,"Marietta, GA",hsa_nci_id,13,760141,1,loc-marietta
+macon,GA,"Macon, GA",hsa_nci_id,13,456389,11,loc-macon
+henry,GA,"Henry, GA",hsa_nci_id,13,778723,5,loc-henry
+cherokee,GA,"Cherokee, GA",hsa_nci_id,13,606374,4,loc-marietta
+athens,GA,"Athens, GA",hsa_nci_id,13,369967,6,loc-henry
+south-augusta,GA,"South Augusta, GA",hsa_nci_id,13,419524,6,loc-south-augusta
+columbus,GA,"Columbus, GA",hsa_nci_id,13,270951,8,loc-henry
+la-grange,GA,"La Grange, GA",hsa_nci_id,13,251521,4,loc-henry
+indianapolis,IN,"Indianapolis, IN",hsa_nci_id,18,1462435,7,loc-indianapolis
+bangor,ME,"Bangor, ME",hsa_nci_id,23,255299,4,loc-bangor
+portland,ME,"Portland, ME",hsa_nci_id,23,405265,4,loc-portland
+baltimore,MD,"Baltimore, MD",hsa_nci_id,24,2586756,6,loc-baltimore
+frederick,MD,"Frederick, MD",hsa_nci_id,24,259547,1,loc-baltimore
+montgomery,MD,"Montgomery, MD",hsa_nci_id,24,2236782,4,loc-baltimore
+harford,MD,"Harford, MD",hsa_nci_id,24,358296,2,loc-baltimore
+worcester,MA,"Franklin & Worcester Counties, MA",hsa_nci_id,25,900802,2,loc-boston
+pittsfield,MA,"Berkshire County, MA",hsa_nci_id,25,124944,1,loc-pittsfield
+boston,MA,"Boston Metro, South Shore, Cape & Islands, MA",hsa_nci_id,25,3885304,7,loc-boston
+springfield,MA,"Hampden & Hampshire Counties, MA",hsa_nci_id,25,627202,2,loc-boston
+new-bedford,MA,"Bristol County, MA",hsa_nci_id,25,565217,1,loc-boston
+lynn,MA,"Essex County, MA",hsa_nci_id,25,789034,1,loc-boston
+st-paul,MN,"St. Paul, MN",hsa_nci_id,27,1298361,4,loc-minneapolis
+duluth,MN,"Duluth, MN",hsa_nci_id,27,337983,7,loc-duluth
+minneapolis,MN,"Minneapolis, MN",hsa_nci_id,27,2192126,9,loc-minneapolis
+st-cloud,MN,"St. Cloud, MN",hsa_nci_id,27,283236,5,loc-minneapolis
+rochester,MN,"Rochester, MN",hsa_nci_id,27,349116,7,loc-rochester
+columbia,SC,"Columbia, SC",hsa_nci_id,45,775296,4,loc-columbia
+greenville,SC,"Greenville, SC",hsa_nci_id,45,932530,4,loc-greenville
+florence,SC,"Florence, SC",hsa_nci_id,45,307047,5,loc-florence
+charleston,SC,"Charleston, SC",hsa_nci_id,45,859021,5,loc-charleston
+rock-hill,SC,"Rock Hill, SC",hsa_nci_id,45,313223,2,loc-clt-area
+horry,SC,"Horry, SC",hsa_nci_id,45,416761,2,loc-horry
+amarillo,TX,"Amarillo, TX",hsa_nci_id,48,350272,15,loc-amarillo
+lubbock,TX,"Lubbock, TX",hsa_nci_id,48,391318,13,loc-lubbock
+houston,TX,"Houston, TX",hsa_nci_id,48,6378597,8,loc-houston
+san-antonio,TX,"San Antonio, TX",hsa_nci_id,48,2455997,12,loc-san-antonio
+beaumont,TX,"Beaumont, TX",hsa_nci_id,48,463359,6,loc-beaumont
+el-paso,TX,"El Paso, TX",hsa_nci_id,48,846464,4,loc-el-paso
+austin,TX,"Austin, TX",hsa_nci_id,48,2040417,6,loc-san-antonio
+mcallen,TX,"Mcallen, TX",hsa_nci_id,48,933340,2,loc-mcallen
+fort-worth,TX,"Fort Worth, TX",hsa_nci_id,48,2491981,5,loc-dallas
+corpus-christi,TX,"Corpus Christi, TX",hsa_nci_id,48,554557,9,loc-corpus-christi
+tyler,TX,"Tyler, TX",hsa_nci_id,48,417617,4,loc-dallas
+killeen,TX,"Killeen, TX",hsa_nci_id,48,485126,4,loc-san-antonio
+dallas,TX,"Dallas, TX",hsa_nci_id,48,4244333,8,loc-dallas
+waco,TX,"Waco, TX",hsa_nci_id,48,361152,6,loc-san-antonio
+bryan,TX,"Bryan, TX",hsa_nci_id,48,329490,5,loc-houston
+denton,TX,"Denton, TX",hsa_nci_id,48,998448,3,loc-dallas
+lake-jackson,TX,"Lake Jackson, TX",hsa_nci_id,48,452463,3,loc-houston
+san-marcos,TX,"San Marcos, TX",hsa_nci_id,48,273855,2,loc-san-antonio
+brownsville,TX,"Brownsville, TX",hsa_nci_id,48,444521,2,loc-mcallen
+galveston,TX,"Galveston, TX",hsa_nci_id,48,342139,1,loc-houston
+laredo,TX,"Laredo, TX",hsa_nci_id,48,296031,3,loc-laredo
+roanoke,VA,"Roanoke, VA",hsa_nci_id,51,592537,12,loc-roanoke
+nyc,NY,NYC,hsa_nci_id,36,8336817,5,loc-nyc
+nenc,NC,"Northeastern, NC",nc_flu_region_id,37,966130,25,loc-nenc
+senc,NC,"Southeastern, NC",nc_flu_region_id,37,822013,7,loc-senc
+fay-area,NC,"Fayetteville Area, NC",nc_flu_region_id,37,1328378,12,loc-rtp-area
+rtp-area,NC,"Research Triangle Park Area, NC",nc_flu_region_id,37,2059588,10,loc-rtp-area
+triad-area,NC,"Triad Area, NC",nc_flu_region_id,37,1732348,15,loc-triad-area
+wnc,NC,"Western, NC",nc_flu_region_id,37,996178,19,loc-clt-area
+clt-area,NC,"Charlotte Area, NC",nc_flu_region_id,37,2583449,12,loc-clt-area
+portland-or,OR,"Portland, OR",hsa_nci_id,41,1925212,5,loc-portland-or
+salem,OR,"Salem, OR",hsa_nci_id,41,541003,3,loc-portland-or
+deschutes,OR,"Deschutes, OR",hsa_nci_id,41,255479,5,loc-deschutes
+eugene,OR,"Eugene, OR",hsa_nci_id,41,493047,2,loc-eugene
+medford,OR,"Medford, OR",hsa_nci_id,41,308431,2,loc-medford
+bay-area,CA,"Bay Area, CA",ca_region_id,06,8509460,12,loc-bay-area
+central-california,CA,"Central California, CA",ca_region_id,06,4383839,11,loc-bay-area
+greater-sierra-sacramento,CA,"Greater Sierra-Sacramento, CA",ca_region_id,06,2942550,13,loc-greater-sierra-sacramento
+los-angeles,CA,"Los Angeles, CA",ca_region_id,06,10039107,1,loc-los-angeles
+rural-north,CA,"Rural North, CA",ca_region_id,06,683300,11,loc-rural-north
+southern-california,CA,"Southern California, CA",ca_region_id,06,12953967,10,loc-southern-california
+bear-river,UT,"Bear River, UT",ut_region_id,49,186818,3,loc-salt-lake
+central,UT,"Central Utah, UT",ut_region_id,49,81954,6,loc-salt-lake
+davis,UT,"Davis County, UT",ut_region_id,49,355481,1,loc-salt-lake
+salt-lake,UT,"Salt Lake County, UT",ut_region_id,49,1160437,1,loc-salt-lake
+san-juan,UT,"San Juan County, UT",ut_region_id,49,15308,1,loc-southeast
+southeast,UT,"Southeast, UT",ut_region_id,49,40229,3,loc-southeast
+southwest,UT,"Southwest, UT",ut_region_id,49,252042,5,loc-southwest
+summit,UT,"Summit County, UT",ut_region_id,49,42145,1,loc-salt-lake
+tooele,UT,"Tooele County, UT",ut_region_id,49,72259,1,loc-salt-lake
+tri-county,UT,"TriCounty, UT",ut_region_id,49,56622,3,loc-tri-county
+utah-county,UT,"Utah County, UT",ut_region_id,49,636235,1,loc-salt-lake
+wasatch,UT,"Wasatch County, UT",ut_region_id,49,34091,1,loc-salt-lake
+weber-morgan,UT,"Weber-Morgan, UT",ut_region_id,49,272337,2,loc-salt-lake

@@ -69,7 +69,7 @@ def _download(url: str, path) -> None:
 # ------------------------------------------------------------------ airports
 def airport_index() -> pd.Series:
     """{group: region travel factor}, population-weighted mean 1 over the simulated regions."""
-    path = TRAVEL_DIR / "airport_index.csv"
+    path = TRAVEL_DIR / f"airport_index{C.SUFFIX}.csv"   # per group
     if path.exists():
         return pd.read_csv(path, index_col=0).iloc[:, 0]
     if not ENPLANEMENTS.exists():

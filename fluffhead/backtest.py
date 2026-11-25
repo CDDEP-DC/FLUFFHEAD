@@ -45,7 +45,7 @@ from . import strains as ST
 
 log = logging.getLogger(__name__)
 
-OUT = C.REPO / "runs" / "backtest"
+OUT = C.RUNS_DIR / "backtest"
 WEATHER_TODAY = dt.date(2026, 11, 4)      # the cached weather files
 PANEL = {"csa438": "Portland ME", "csa162": "Burlington VT", "csa106": "Albuquerque NM", "csa332": "Las Vegas NV",
          "csa416": "Oklahoma City OK", "csa142": "Birmingham AL", "csa340": "Little Rock AR", "csa218": "Des Moines IA",
@@ -227,7 +227,7 @@ def run_case(variant: str, spec: dict, season: int, cutoff: str, group: str, n_d
     w = np.stack([daily[:, (dates > e - pd.Timedelta(days=7)) & (dates <= e)].sum(1) for e in allw], 1)   # [traj, weeks, pieces]
     share = region.forecast_share()
     tv = tr.drop_duplicates(["date", "location"], keep="last").pivot(index="date", columns="location", values="value").astype(float)
-    y = np.column_stack([tv[p].reindex(allw).to_numpy() * s for p, s in zip(region.pieces, share)])
+    y = np.column_stack([tv[st].reindex(allw).to_numpy() * s for st, s in zip(region.piece_state or region.pieces, share)])
     th = fit.kept
     p = case_path(variant, season, cutoff, group)
     p.parent.mkdir(parents=True, exist_ok=True)

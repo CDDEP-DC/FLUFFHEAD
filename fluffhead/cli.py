@@ -2,6 +2,8 @@
 
 Setup (once, or when region rules change):
     fluffhead regions        choose simulation groups -> data/regions/
+    fluffhead local-regions  FLUFFHEADMetro's groups for the Flu MetroCast hub -> data/regions-local/
+                             (then run the other commands with FLUFFHEAD_VARIANT=local)
     fluffhead fetch          download GREASYPOP inputs for every state the groups need
     fluffhead networks       build each group's network with GREASYPOP (resumable);
                              --vintage 2023 uses GeoPops' 2023 data pipeline instead
@@ -13,6 +15,8 @@ Weekly:
                              week's saved regions, e.g. after Wednesday's NSSP release
     fluffhead weather        download today's station humidity for every region into cache/weather
                              (local/aws/pack.sh runs it, so the AWS instance doesn't wait on it)
+    fluffhead maryland       Maryland hospital forecasts and MDH's masking-trigger outlook, from the
+                             week's state samples (maryland.py; not for the hub)
 
 Calibration:
     fluffhead hindcast       fit past seasons per region; sets the immunity prior (hindcast.py)
@@ -47,6 +51,26 @@ def cmd_regions(args) -> int:
     g = regions.build()
     cv = regions.coverage()
     print(f"{len(g)} groups, {cv.simulated.sum() / cv['pop'].sum():.1%} of the population simulated")
+    return 0
+
+
+def cmd_local_regions(args) -> int:
+    from . import local
+    g = local.build()
+    print(f"{len(g)} groups, {g.n_units.sum()} hub locations, {g['pop'].sum() / 1e6:.1f} M people")
+    return 0
+
+
+def cmd_local_submit(args) -> int:
+    """FLUFFHEADMetro's hub file again from a week's saved regions (e.g. after main FLUFFHEAD finished)."""
+    from . import local, pipeline as P
+    if not C.LOCAL:
+        raise SystemExit("run with FLUFFHEAD_VARIANT=local")
+    ref = args.reference_date or P.reference_date_for(dt.date.today())
+    path, problems = local.write(ref, C.RUNS_DIR / str(ref) / "regions")
+    print(path)
+    for p in problems:
+        print(p)
     return 0
 
 
@@ -155,8 +179,16 @@ def cmd_alternate(args) -> int:
 
 
 def cmd_weather(args) -> int:
-    from . import pipeline as P, weather as W
-    W.prefetch(args.groups or P.built_groups())
+    from . import weather as W
+    # every group, built or not (FLUFFHEADMetro's networks may only exist on the instance)
+    W.prefetch(args.groups or list(pd.read_csv(C.REGIONS_DIR / "groups.csv").group))
+    return 0
+
+
+def cmd_maryland(args) -> int:
+    from . import maryland as M
+    s = M.run(args.reference_date, with_history=args.history)
+    print(json.dumps(s, indent=2, default=str))
     return 0
 
 
@@ -222,9 +254,18 @@ def main(argv=None) -> int:
     p.add_argument("--reference-date", type=_date)
     p.add_argument("--no-nowcast", action="store_true")
     p.set_defaults(fn=cmd_alternate)
+    p = sub.add_parser("local-regions")
+    p.set_defaults(fn=cmd_local_regions)
+    p = sub.add_parser("local-submit")
+    p.add_argument("--reference-date", type=_date)
+    p.set_defaults(fn=cmd_local_submit)
     p = sub.add_parser("weather")
     p.add_argument("--groups", nargs="*")
     p.set_defaults(fn=cmd_weather)
+    p = sub.add_parser("maryland", help="hospital forecasts and MDH masking-trigger outlook (not for the hub)")
+    p.add_argument("--reference-date", type=_date, required=True)
+    p.add_argument("--history", action="store_true", help="also score the trigger forecast on past seasons")
+    p.set_defaults(fn=cmd_maryland)
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")

@@ -8,9 +8,19 @@ from pathlib import Path
 import numpy as np
 
 REPO = Path(__file__).resolve().parent.parent
+# Which model this is. "" (default): FLUFFHEAD, state forecasts for the FluSight hub.
+# "local": FLUFFHEADMetro, forecasts for the Flu MetroCast hub's metro areas (local.py). It runs on
+# its own regions (data/regions-local/, one network per group of commuting-linked hub locations,
+# with each hub location a piece) and writes to forecasts-local/ and runs-local/.
+VARIANT = os.environ.get("FLUFFHEAD_VARIANT", "")
+if VARIANT not in ("", "local"):
+    raise SystemExit(f"FLUFFHEAD_VARIANT must be empty or 'local', not {VARIANT!r}")
+LOCAL = VARIANT == "local"
+SUFFIX = "-local" if LOCAL else ""      # for files and folders that differ between the two
 DATA_DIR = REPO / "data"
 RAW_DIR = DATA_DIR / "raw"              # downloads (not tracked)
-REGIONS_DIR = DATA_DIR / "regions"      # region definitions (tracked) and networks (not tracked)
+REGIONS_DIR = DATA_DIR / f"regions{SUFFIX}"   # region definitions (tracked) and networks (not tracked)
+RUNS_DIR = REPO / f"runs{SUFFIX}"       # simulation outputs
 WORK_DIR = REPO / "work"                # GREASYPOP working copies (not tracked)
 GREASYPOP_SRC = Path(os.environ.get("GREASYPOP_SRC", REPO.parent / "GREASYPOP-CO"))
 # which networks the model runs on: 2023 (GeoPops data, 2020 tracts, data/regions/<g>/network-2023/;
@@ -41,12 +51,12 @@ COMMUTE_STATE_MIN_SHARE = 0.002  # a state is a GREASYPOP commute state above th
 # Puerto Rico has no LODES commuting data, so GREASYPOP can't build its workplaces.
 SCALED_STATES = {"72": "csa370"}   # Puerto Rico <- Miami-Port St. Lucie-Fort Lauderdale
 
-FORECAST_DIR = REPO / "forecasts"   # weekly outputs (tracked)
+FORECAST_DIR = REPO / f"forecasts{SUFFIX}"   # weekly outputs (tracked)
 CACHE_DIR = Path(os.environ.get("FLUFFHEAD_CACHE", REPO / "cache"))  # hub downloads (not tracked)
 
 # ------------------------------------------------------------------- hub
 TEAM_ABBR = "OHTJHU"
-MODEL_ABBR = "FLUFFHEAD"
+MODEL_ABBR = "FLUFFHEADMetro" if LOCAL else "FLUFFHEAD"
 HUB_REPO = "cdcepi/FluSight-forecast-hub"
 HUB_BRANCH = "main"
 TARGET_PATHS = {"hosp": "target-data/target-hospital-admissions.csv"}
