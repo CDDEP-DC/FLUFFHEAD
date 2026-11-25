@@ -4,7 +4,7 @@
 
 It simulates individual people in 116 US regions, about 265 million residents and 81% of the population, on synthetic populations built from 2023 Census data with [GeoPops](https://github.com/GeoPopsHub/geopops). Set `FLUFFHEAD_NETWORK_VINTAGE=2019` to use the earlier networks, built from 2019 data with [GREASYPOP-CO](https://github.com/CDDEP-DC/GREASYPOP-CO).
 
-> **Status:** in development. The forecasts in `forecasts/` are working versions and have not been submitted to the hub.
+> **Status:** in development; submitting to the hub weekly since reference date 2026-11-07. See [Submissions](#submissions).
 
 ## How it works
 
@@ -58,15 +58,29 @@ Run this after the hub's target data updates on Wednesday. Output goes to `forec
 | `--strains 2` | Add a variant; see `--variant-origin` and the other `--variant-*` options |
 | `--one-pass` | Skip the national pass |
 
+To download the day's station humidity for every region ahead of a run, use `python -m fluffhead weather`; it goes to `cache/weather/`.
+
 Finished regions are skipped, so an interrupted run resumes. Move `runs/<date>/` aside to start a date over.
 
-**Momentum alternate (trial, not submitted).** Each run also writes a second forecast from the same samples. It shifts each state's forecast by how far its flu ED visits lead its admissions (`fluffhead/momentum.py`). In backtests, this cut the error at peaks and declines by about a quarter. The file is `forecasts/alternates/momentum/<date>-OHTJHU-FLUFFHEAD.csv` and the review report is `forecasts/reports/<date>-momentum-report.html`, which also shows the main median for comparison. A state is corrected only when its ED data include the last reported week and it had at least 20 admissions. NSSP posts on Wednesday mornings, so a run before then corrects nothing. In that case, rerun just the alternate afterwards (it takes seconds):
+**Momentum alternate (trial).** Each run also writes a second forecast from the same samples. It shifts each state's forecast by how far its flu ED visits lead its admissions (`fluffhead/momentum.py`). In backtests, this cut the error at peaks and declines by about a quarter. The file is `forecasts/alternates/momentum/<date>-OHTJHU-FLUFFHEAD.csv` and the review report is `forecasts/reports/<date>-momentum-report.html`, which also shows the main median for comparison. A state is corrected only when its ED data include the last reported week and it had at least 20 admissions. NSSP posts on Wednesday mornings, so a run before then corrects nothing. In that case, rerun just the alternate afterwards (it takes seconds):
 
 ```bash
 python -m fluffhead alternate --reference-date 2026-11-21
 ```
 
-To submit the alternate instead of the main forecast, copy its file over the one in `forecasts/model-output/`.
+To submit the alternate instead of the main forecast, first copy the main file to `forecasts/archive/<date>-main-OHTJHU-FLUFFHEAD.csv`, then copy the alternate over the one in `forecasts/model-output/`. The trial log is `forecasts/alternates/momentum/TRIAL.md`.
+
+## Submissions
+
+Files in `forecasts/model-output/OHTJHU-FLUFFHEAD/` for these dates are the ones submitted to the hub.
+
+| Reference date | Submitted | Hub pull request |
+|---|---|---|
+| 2026-11-07 | main | [#4003](https://github.com/cdcepi/FluSight-forecast-hub/pull/4003) |
+| 2026-11-14 | main | [#4101](https://github.com/cdcepi/FluSight-forecast-hub/pull/4101) |
+| 2026-11-21 | momentum alternate (main version in `forecasts/archive/`) | [#4154](https://github.com/cdcepi/FluSight-forecast-hub/pull/4154) |
+
+The 2026-10-31 file was not submitted.
 
 ## Layout
 
@@ -74,7 +88,9 @@ To submit the alternate instead of the main forecast, copy its file over the one
 |---|---|
 | `fluffhead/` | The model and pipeline |
 | `tests/` | Unit tests |
-| `forecasts/` | Submission files, reports, archived versions, draft hub metadata |
+| `forecasts/` | Submission files, reports, archived versions, the momentum alternate, hub metadata |
+| `data/regions/` | Simulation groups and their geography (networks are built separately) |
+| `data/momentum/` | Coefficients and training data for the momentum alternate |
 | `data/state/` | Archived state data |
 
 ## License
