@@ -1,0 +1,58 @@
+{
+  "reference_date": "2026-11-21",
+  "data_through": "2026-11-14",
+  "made": "2026-11-23",
+  "last_combined_rate_reported": 2.1,
+  "kappa_by_season": {
+    "2022": 1.38,
+    "2023": 1.75,
+    "2024": 1.18,
+    "2025": 1.51
+  },
+  "crossing_week": {
+    "p_within": 0.9505,
+    "horizon_end": "2027-05-29",
+    "q10": "2026-12-12",
+    "q25": "2026-12-19",
+    "q50": "2026-12-19",
+    "q75": "2026-12-19",
+    "q90": "2026-12-26",
+    "median": "2026-12-19"
+  },
+  "recommend_now": false,
+  "p_over_10_within_2wk": 0.006,
+  "rule": "recommend when P(settled combined rate > 10 in a week ending within 14 days of the forecast) >= 0.5",
+  "note": "Combined COVID+flu+RSV RESP-NET rate, settled values (see maryland.py)",
+  "history": [
+    {
+      "season": "2023-24",
+      "model_recommends": "2023-11-29",
+      "settled_rate_first_over_10_week_ending": "2023-12-02",
+      "mdh_announced": "2023-12-28",
+      "model_days_before_mdh": 29,
+      "model_days_after_crossing_week": -3,
+      "mdh_days_after_crossing_week": 26,
+      "forecasts": 4
+    },
+    {
+      "season": "2024-25",
+      "model_recommends": "2024-12-18",
+      "settled_rate_first_over_10_week_ending": "2024-12-28",
+      "mdh_announced": "2025-01-14",
+      "model_days_before_mdh": 27,
+      "model_days_after_crossing_week": -10,
+      "mdh_days_after_crossing_week": 17,
+      "forecasts": 4
+    },
+    {
+      "season": "2025-26",
+      "model_recommends": "2025-12-10",
+      "settled_rate_first_over_10_week_ending": "2025-12-20",
+      "mdh_announced": "2026-01-05",
+      "model_days_before_mdh": 26,
+      "model_days_after_crossing_week": -10,
+      "mdh_days_after_crossing_week": 16,
+      "forecasts": 4
+    }
+  ]
+}

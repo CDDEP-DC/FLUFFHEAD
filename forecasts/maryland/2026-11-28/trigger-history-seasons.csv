@@ -1,0 +1,4 @@
+season,model_recommends,settled_rate_first_over_10_week_ending,mdh_announced,mdh_source,model_days_before_mdh,model_days_after_crossing_week,mdh_days_after_crossing_week,forecasts
+2023-24,2023-11-29,2023-12-02,2023-12-28,"MDH notice to clinicians, Dec 28, 2023 (reported by Eye On Annapolis, Dec 29)",29,-3,26,4
+2024-25,2024-12-18,2024-12-28,2025-01-14,"MDH clinician letter, Jan 14, 2025: week ending Jan 4, rate 10.2",27,-10,17,4
+2025-26,2025-12-10,2025-12-20,2026-01-05,"MDH news release, Jan 5, 2026: dashboard week ending Dec 26-27",26,-10,16,4

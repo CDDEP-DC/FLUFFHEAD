@@ -1,0 +1,461 @@
+ccn,hospital,city,target_end_date,q0.1,q0.25,q0.5,q0.75,q0.9
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2026-11-28,4.0,6.0,8.0,10.0,12.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2026-12-05,5.0,7.0,9.0,11.0,13.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2026-12-12,6.0,8.0,11.0,13.0,16.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2026-12-19,9.0,12.0,16.0,21.0,25.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2026-12-26,12.0,15.0,21.0,28.0,38.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2027-01-02,8.0,11.0,16.0,22.0,34.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2027-01-09,4.0,6.0,9.0,14.0,21.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2027-01-16,2.0,4.0,6.0,9.0,16.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2027-01-23,1.0,2.0,4.0,6.0,12.0
+210009,"Johns Hopkins Hospital, The",BALTIMORE,2027-01-30,0.0,1.0,3.0,5.0,9.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2026-11-28,4.0,5.0,7.0,9.0,11.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2026-12-05,4.0,6.0,8.0,10.0,12.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2026-12-12,5.0,7.0,10.0,12.0,15.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2026-12-19,8.0,11.0,15.0,19.0,23.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2026-12-26,10.0,14.0,19.0,25.0,33.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2027-01-02,6.0,10.0,14.0,21.0,31.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2027-01-09,3.0,5.0,8.0,13.0,20.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2027-01-16,2.0,3.0,5.0,8.0,14.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2027-01-23,1.0,2.0,4.0,6.0,11.0
+210044,Greater Baltimore Medical Center,BALTIMORE,2027-01-30,0.0,1.0,2.0,4.0,8.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2026-11-28,3.0,4.0,6.0,7.0,9.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2026-12-05,3.0,5.0,6.0,9.0,10.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2026-12-12,4.0,6.0,8.0,10.0,12.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2026-12-19,6.0,9.0,12.0,16.0,19.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2026-12-26,8.0,11.0,15.0,21.0,28.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2027-01-02,6.0,8.0,12.0,18.0,25.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2027-01-09,2.0,4.0,7.0,10.0,17.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2027-01-16,1.0,3.0,4.0,7.0,12.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2027-01-23,1.0,2.0,3.0,5.0,8.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,2027-01-30,0.0,1.0,2.0,4.0,6.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2026-11-28,3.0,4.0,6.0,7.0,9.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2026-12-05,3.0,5.0,6.0,8.0,10.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2026-12-12,4.0,6.0,8.0,10.0,12.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2026-12-19,6.0,9.0,12.0,15.0,19.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2026-12-26,8.0,11.0,15.0,21.0,28.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2027-01-02,5.0,8.0,11.0,17.0,25.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2027-01-09,2.0,4.0,6.0,10.0,16.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2027-01-16,1.0,2.0,4.0,7.0,12.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2027-01-23,1.0,1.0,3.0,5.0,9.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,2027-01-30,0.0,1.0,2.0,4.0,6.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2026-11-28,3.0,4.0,6.0,7.0,9.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2026-12-05,3.0,4.0,6.0,8.0,10.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2026-12-12,4.0,6.0,8.0,10.0,12.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2026-12-19,6.0,9.0,12.0,15.0,19.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2026-12-26,8.0,11.0,15.0,20.0,27.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2027-01-02,5.0,8.0,11.0,17.0,25.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2027-01-09,2.0,4.0,6.0,10.0,16.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2027-01-16,1.0,2.0,4.0,7.0,12.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2027-01-23,0.0,1.0,3.0,5.0,8.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,2027-01-30,0.0,1.0,2.0,4.0,6.0
+210005,Frederick Health Hospital,FREDERICK,2026-11-28,3.0,4.0,5.0,7.0,9.0
+210005,Frederick Health Hospital,FREDERICK,2026-12-05,3.0,4.0,6.0,8.0,10.0
+210005,Frederick Health Hospital,FREDERICK,2026-12-12,4.0,5.0,8.0,10.0,12.0
+210005,Frederick Health Hospital,FREDERICK,2026-12-19,6.0,9.0,12.0,15.0,18.0
+210005,Frederick Health Hospital,FREDERICK,2026-12-26,7.0,11.0,15.0,20.0,27.0
+210005,Frederick Health Hospital,FREDERICK,2027-01-02,5.0,8.0,11.0,16.0,25.0
+210005,Frederick Health Hospital,FREDERICK,2027-01-09,2.0,4.0,6.0,10.0,15.0
+210005,Frederick Health Hospital,FREDERICK,2027-01-16,1.0,2.0,4.0,7.0,11.0
+210005,Frederick Health Hospital,FREDERICK,2027-01-23,1.0,1.0,3.0,5.0,9.0
+210005,Frederick Health Hospital,FREDERICK,2027-01-30,0.0,1.0,2.0,4.0,6.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2026-11-28,3.0,4.0,5.0,7.0,8.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2026-12-05,3.0,4.0,6.0,8.0,9.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2026-12-12,3.0,5.0,7.0,9.0,11.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2026-12-19,5.0,8.0,11.0,14.0,17.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2026-12-26,7.0,10.0,14.0,19.0,26.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2027-01-02,5.0,7.0,11.0,16.0,23.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2027-01-09,2.0,4.0,6.0,10.0,15.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2027-01-16,1.0,2.0,4.0,6.0,11.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2027-01-23,1.0,1.0,3.0,5.0,8.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,2027-01-30,0.0,1.0,2.0,3.0,6.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2026-11-28,2.0,3.0,5.0,6.0,8.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2026-12-05,3.0,4.0,6.0,7.0,9.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2026-12-12,3.0,5.0,7.0,9.0,11.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2026-12-19,5.0,7.0,10.0,13.0,16.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2026-12-26,6.0,9.0,13.0,18.0,24.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2027-01-02,4.0,7.0,10.0,15.0,22.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2027-01-09,2.0,3.0,6.0,9.0,14.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2027-01-16,1.0,2.0,4.0,6.0,10.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2027-01-23,0.0,1.0,3.0,4.0,7.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,2027-01-30,0.0,1.0,2.0,3.0,5.100000000000136
+210004,Holy Cross Hospital,SILVER SPRING,2026-11-28,2.0,3.0,4.0,6.0,7.0
+210004,Holy Cross Hospital,SILVER SPRING,2026-12-05,2.0,3.0,5.0,7.0,8.0
+210004,Holy Cross Hospital,SILVER SPRING,2026-12-12,3.0,4.0,6.0,8.0,10.0
+210004,Holy Cross Hospital,SILVER SPRING,2026-12-19,4.0,7.0,9.0,12.0,15.0
+210004,Holy Cross Hospital,SILVER SPRING,2026-12-26,6.0,9.0,12.0,16.0,22.0
+210004,Holy Cross Hospital,SILVER SPRING,2027-01-02,4.0,6.0,9.0,14.0,20.0
+210004,Holy Cross Hospital,SILVER SPRING,2027-01-09,2.0,3.0,5.0,8.0,13.0
+210004,Holy Cross Hospital,SILVER SPRING,2027-01-16,1.0,2.0,3.0,6.0,9.0
+210004,Holy Cross Hospital,SILVER SPRING,2027-01-23,0.0,1.0,2.0,4.0,7.0
+210004,Holy Cross Hospital,SILVER SPRING,2027-01-30,0.0,1.0,2.0,3.0,5.0
+210022,Suburban Hospital,BETHESDA,2026-11-28,2.0,3.0,4.0,6.0,7.100000000000136
+210022,Suburban Hospital,BETHESDA,2026-12-05,2.0,4.0,5.0,7.0,8.0
+210022,Suburban Hospital,BETHESDA,2026-12-12,3.0,4.0,6.0,8.0,10.0
+210022,Suburban Hospital,BETHESDA,2026-12-19,4.0,7.0,10.0,12.0,15.0
+210022,Suburban Hospital,BETHESDA,2026-12-26,6.0,8.75,12.0,17.0,22.0
+210022,Suburban Hospital,BETHESDA,2027-01-02,4.0,6.0,9.0,13.0,20.0
+210022,Suburban Hospital,BETHESDA,2027-01-09,2.0,3.0,5.0,8.0,12.100000000000136
+210022,Suburban Hospital,BETHESDA,2027-01-16,1.0,2.0,3.0,5.0,9.0
+210022,Suburban Hospital,BETHESDA,2027-01-23,0.0,1.0,2.0,4.0,7.0
+210022,Suburban Hospital,BETHESDA,2027-01-30,0.0,1.0,2.0,3.0,5.0
+210001,Meritus Medical Center,HAGERSTOWN,2026-11-28,2.0,3.0,4.0,6.0,7.0
+210001,Meritus Medical Center,HAGERSTOWN,2026-12-05,2.0,3.0,5.0,7.0,8.0
+210001,Meritus Medical Center,HAGERSTOWN,2026-12-12,2.0,4.0,6.0,8.0,10.0
+210001,Meritus Medical Center,HAGERSTOWN,2026-12-19,4.0,7.0,9.0,12.0,15.0
+210001,Meritus Medical Center,HAGERSTOWN,2026-12-26,5.0,8.0,11.0,16.0,22.0
+210001,Meritus Medical Center,HAGERSTOWN,2027-01-02,4.0,6.0,9.0,13.0,20.0
+210001,Meritus Medical Center,HAGERSTOWN,2027-01-09,1.0,3.0,5.0,8.0,12.0
+210001,Meritus Medical Center,HAGERSTOWN,2027-01-16,1.0,2.0,3.0,6.0,9.0
+210001,Meritus Medical Center,HAGERSTOWN,2027-01-23,0.0,1.0,2.0,4.0,7.0
+210001,Meritus Medical Center,HAGERSTOWN,2027-01-30,0.0,1.0,1.0,3.0,5.0
+210033,Carroll Hospital Center,WESTMINSTER,2026-11-28,1.0,2.0,4.0,5.0,6.0
+210033,Carroll Hospital Center,WESTMINSTER,2026-12-05,2.0,3.0,4.0,5.0,7.0
+210033,Carroll Hospital Center,WESTMINSTER,2026-12-12,2.0,4.0,5.0,7.0,9.0
+210033,Carroll Hospital Center,WESTMINSTER,2026-12-19,3.0,6.0,8.0,10.0,13.0
+210033,Carroll Hospital Center,WESTMINSTER,2026-12-26,5.0,7.0,10.0,14.0,19.0
+210033,Carroll Hospital Center,WESTMINSTER,2027-01-02,3.0,5.0,8.0,12.0,17.0
+210033,Carroll Hospital Center,WESTMINSTER,2027-01-09,1.0,2.0,4.0,7.0,11.0
+210033,Carroll Hospital Center,WESTMINSTER,2027-01-16,1.0,1.0,3.0,5.0,8.0
+210033,Carroll Hospital Center,WESTMINSTER,2027-01-23,0.0,1.0,2.0,3.0,6.0
+210033,Carroll Hospital Center,WESTMINSTER,2027-01-30,0.0,0.0,1.0,3.0,4.0
+210011,Saint Agnes Hospital,BALTIMORE,2026-11-28,1.0,2.0,4.0,5.0,6.0
+210011,Saint Agnes Hospital,BALTIMORE,2026-12-05,2.0,3.0,4.0,6.0,7.0
+210011,Saint Agnes Hospital,BALTIMORE,2026-12-12,2.0,3.0,5.0,7.0,8.0
+210011,Saint Agnes Hospital,BALTIMORE,2026-12-19,3.0,5.0,7.0,10.0,13.0
+210011,Saint Agnes Hospital,BALTIMORE,2026-12-26,4.0,7.0,10.0,14.0,18.0
+210011,Saint Agnes Hospital,BALTIMORE,2027-01-02,3.0,5.0,8.0,11.0,16.0
+210011,Saint Agnes Hospital,BALTIMORE,2027-01-09,1.0,3.0,4.0,7.0,11.0
+210011,Saint Agnes Hospital,BALTIMORE,2027-01-16,0.0,1.0,3.0,5.0,8.0
+210011,Saint Agnes Hospital,BALTIMORE,2027-01-23,0.0,1.0,2.0,3.0,5.100000000000136
+210011,Saint Agnes Hospital,BALTIMORE,2027-01-30,0.0,0.0,1.0,2.0,4.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2026-11-28,1.0,2.0,3.0,5.0,6.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2026-12-05,2.0,3.0,4.0,5.0,7.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2026-12-12,2.0,3.0,5.0,7.0,8.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2026-12-19,3.0,5.0,7.0,10.0,13.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2026-12-26,4.0,7.0,9.0,13.0,18.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2027-01-02,3.0,5.0,7.0,11.0,16.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2027-01-09,1.0,2.0,4.0,7.0,10.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2027-01-16,1.0,1.0,3.0,5.0,7.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2027-01-23,0.0,1.0,2.0,3.0,5.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,2027-01-30,0.0,0.0,1.0,2.0,4.0
+210018,Medstar Montgomery Medical Center,OLNEY,2026-11-28,1.0,2.0,3.0,5.0,6.0
+210018,Medstar Montgomery Medical Center,OLNEY,2026-12-05,1.0,2.0,4.0,5.0,6.0
+210018,Medstar Montgomery Medical Center,OLNEY,2026-12-12,2.0,3.0,5.0,6.0,8.0
+210018,Medstar Montgomery Medical Center,OLNEY,2026-12-19,3.0,5.0,7.0,9.0,12.0
+210018,Medstar Montgomery Medical Center,OLNEY,2026-12-26,4.0,6.0,9.0,12.0,17.0
+210018,Medstar Montgomery Medical Center,OLNEY,2027-01-02,2.0,4.0,7.0,10.0,14.0
+210018,Medstar Montgomery Medical Center,OLNEY,2027-01-09,1.0,2.0,4.0,6.0,9.0
+210018,Medstar Montgomery Medical Center,OLNEY,2027-01-16,0.0,1.0,2.0,4.0,7.0
+210018,Medstar Montgomery Medical Center,OLNEY,2027-01-23,0.0,1.0,2.0,3.0,5.0
+210018,Medstar Montgomery Medical Center,OLNEY,2027-01-30,0.0,0.0,1.0,2.0,4.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2026-11-28,1.0,2.0,3.0,4.0,5.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2026-12-05,1.0,2.0,3.0,5.0,6.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2026-12-12,1.0,3.0,4.0,6.0,7.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2026-12-19,3.0,4.0,6.0,9.0,11.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2026-12-26,3.0,6.0,8.0,11.0,15.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2027-01-02,2.0,4.0,6.0,9.0,14.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2027-01-09,1.0,2.0,3.0,6.0,9.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2027-01-16,0.0,1.0,2.0,4.0,6.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2027-01-23,0.0,1.0,1.0,3.0,5.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,2027-01-30,0.0,0.0,1.0,2.0,4.0
+210002,University Of Maryland Medical Center,BALTIMORE,2026-11-28,1.0,2.0,3.0,4.0,5.0
+210002,University Of Maryland Medical Center,BALTIMORE,2026-12-05,1.0,2.0,3.0,4.0,6.0
+210002,University Of Maryland Medical Center,BALTIMORE,2026-12-12,1.0,3.0,4.0,5.0,7.0
+210002,University Of Maryland Medical Center,BALTIMORE,2026-12-19,2.0,4.0,6.0,8.0,11.0
+210002,University Of Maryland Medical Center,BALTIMORE,2026-12-26,3.0,6.0,8.0,11.0,15.0
+210002,University Of Maryland Medical Center,BALTIMORE,2027-01-02,2.0,4.0,6.0,9.0,13.0
+210002,University Of Maryland Medical Center,BALTIMORE,2027-01-09,1.0,2.0,3.0,6.0,9.0
+210002,University Of Maryland Medical Center,BALTIMORE,2027-01-16,0.0,1.0,2.0,4.0,6.0
+210002,University Of Maryland Medical Center,BALTIMORE,2027-01-23,0.0,1.0,1.0,3.0,5.0
+210002,University Of Maryland Medical Center,BALTIMORE,2027-01-30,0.0,0.0,1.0,2.0,4.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2026-11-28,1.0,2.0,3.0,4.0,5.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2026-12-05,1.0,2.0,3.0,4.0,6.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2026-12-12,1.0,2.0,4.0,5.0,7.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2026-12-19,2.0,4.0,6.0,8.0,10.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2026-12-26,3.0,5.0,7.0,10.0,14.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2027-01-02,2.0,4.0,6.0,9.0,13.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2027-01-09,1.0,2.0,3.0,5.0,8.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2027-01-16,0.0,1.0,2.0,4.0,6.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2027-01-23,0.0,0.0,1.0,3.0,4.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210027,UPMC Western Maryland,CUMBERLAND,2026-11-28,1.0,2.0,3.0,4.0,5.0
+210027,UPMC Western Maryland,CUMBERLAND,2026-12-05,1.0,2.0,3.0,4.0,5.0
+210027,UPMC Western Maryland,CUMBERLAND,2026-12-12,1.0,2.0,4.0,5.0,7.0
+210027,UPMC Western Maryland,CUMBERLAND,2026-12-19,2.0,4.0,6.0,8.0,10.0
+210027,UPMC Western Maryland,CUMBERLAND,2026-12-26,3.0,5.0,7.0,10.0,14.0
+210027,UPMC Western Maryland,CUMBERLAND,2027-01-02,2.0,3.0,6.0,9.0,12.0
+210027,UPMC Western Maryland,CUMBERLAND,2027-01-09,1.0,2.0,3.0,5.0,8.0
+210027,UPMC Western Maryland,CUMBERLAND,2027-01-16,0.0,1.0,2.0,3.25,6.0
+210027,UPMC Western Maryland,CUMBERLAND,2027-01-23,0.0,0.0,1.0,3.0,4.0
+210027,UPMC Western Maryland,CUMBERLAND,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2026-11-28,1.0,1.0,2.0,3.0,5.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2026-12-05,1.0,2.0,3.0,4.0,5.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2026-12-12,1.0,2.0,3.0,5.0,6.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2026-12-19,2.0,3.0,5.0,7.0,9.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2026-12-26,2.0,4.0,7.0,10.0,13.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2027-01-02,1.0,3.0,5.0,8.0,11.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2027-01-09,1.0,1.0,3.0,5.0,7.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2026-11-28,1.0,1.0,2.0,3.0,4.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2026-12-05,1.0,1.0,2.0,4.0,5.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2026-12-12,1.0,2.0,3.0,5.0,6.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2026-12-19,2.0,3.0,5.0,7.0,9.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2026-12-26,2.0,4.0,6.0,9.0,12.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2027-01-02,1.0,3.0,5.0,7.0,11.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2027-01-09,0.0,1.0,3.0,4.0,7.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2026-11-28,1.0,1.0,2.0,3.0,5.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2026-12-05,1.0,1.0,2.0,4.0,5.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2026-12-12,1.0,2.0,3.0,5.0,6.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2026-12-19,2.0,3.0,5.0,7.0,9.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2026-12-26,2.0,4.0,6.0,9.0,12.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2027-01-02,1.0,3.0,5.0,7.0,10.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2027-01-09,0.0,1.0,3.0,4.0,7.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2026-11-28,1.0,1.0,2.0,3.0,4.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2026-12-05,1.0,1.0,2.0,4.0,5.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2026-12-12,1.0,2.0,3.0,4.0,6.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2026-12-19,2.0,3.0,5.0,7.0,8.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2026-12-26,2.0,4.0,6.0,9.0,12.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2027-01-02,1.0,3.0,5.0,7.0,10.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2027-01-09,0.0,1.0,3.0,4.0,7.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210034,Medstar Harbor Hospital,BALTIMORE,2026-11-28,1.0,1.0,2.0,3.0,4.0
+210034,Medstar Harbor Hospital,BALTIMORE,2026-12-05,1.0,1.0,2.0,4.0,5.0
+210034,Medstar Harbor Hospital,BALTIMORE,2026-12-12,1.0,2.0,3.0,4.0,6.0
+210034,Medstar Harbor Hospital,BALTIMORE,2026-12-19,2.0,3.0,4.0,6.0,8.0
+210034,Medstar Harbor Hospital,BALTIMORE,2026-12-26,2.0,4.0,6.0,8.0,11.0
+210034,Medstar Harbor Hospital,BALTIMORE,2027-01-02,1.0,3.0,5.0,7.0,10.0
+210034,Medstar Harbor Hospital,BALTIMORE,2027-01-09,0.0,1.0,3.0,4.0,6.0
+210034,Medstar Harbor Hospital,BALTIMORE,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210034,Medstar Harbor Hospital,BALTIMORE,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210034,Medstar Harbor Hospital,BALTIMORE,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2026-12-05,1.0,1.0,2.0,3.0,5.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2026-12-12,1.0,2.0,3.0,4.0,5.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2026-12-19,2.0,3.0,4.0,6.0,8.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2026-12-26,2.0,4.0,6.0,8.0,11.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2027-01-02,1.0,3.0,5.0,7.0,10.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2026-12-12,1.0,2.0,3.0,4.0,5.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2026-12-19,1.0,3.0,4.0,6.0,8.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2026-12-26,2.0,3.0,6.0,8.0,11.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2027-01-02,1.0,2.0,4.0,6.0,9.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2027-01-16,0.0,1.0,2.0,3.0,5.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2027-01-23,0.0,0.0,1.0,2.0,4.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,2027-01-30,0.0,0.0,1.0,2.0,3.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2026-12-12,1.0,1.0,3.0,4.0,5.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2026-12-19,1.0,3.0,4.0,6.0,7.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2026-12-26,2.0,3.0,5.0,8.0,10.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2027-01-02,1.0,2.0,4.0,6.0,9.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2027-01-16,0.0,0.75,1.0,3.0,4.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,2027-01-30,0.0,0.0,1.0,1.0,2.0
+210061,Atlantic General Hospital,BERLIN,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210061,Atlantic General Hospital,BERLIN,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210061,Atlantic General Hospital,BERLIN,2026-12-12,1.0,1.0,2.0,4.0,5.0
+210061,Atlantic General Hospital,BERLIN,2026-12-19,1.0,2.0,4.0,6.0,7.0
+210061,Atlantic General Hospital,BERLIN,2026-12-26,2.0,3.0,5.0,7.0,10.0
+210061,Atlantic General Hospital,BERLIN,2027-01-02,1.0,2.0,4.0,6.0,9.0
+210061,Atlantic General Hospital,BERLIN,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210061,Atlantic General Hospital,BERLIN,2027-01-16,0.0,0.0,1.0,3.0,4.0
+210061,Atlantic General Hospital,BERLIN,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210061,Atlantic General Hospital,BERLIN,2027-01-30,0.0,0.0,1.0,1.0,2.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2026-12-12,0.0,1.0,3.0,4.0,5.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2026-12-19,1.0,2.0,4.0,5.0,7.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2026-12-26,2.0,3.0,5.0,7.0,10.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2027-01-02,1.0,2.0,4.0,6.0,9.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2027-01-16,0.0,0.0,1.0,3.0,4.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210040,Northwest Hospital Center,RANDALLSTOWN,2027-01-30,0.0,0.0,1.0,1.0,2.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2026-12-12,0.0,1.0,2.0,4.0,5.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2026-12-19,1.0,2.0,4.0,5.0,7.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2026-12-26,2.0,3.0,5.0,7.0,9.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2027-01-02,1.0,2.0,4.0,6.0,9.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2027-01-16,0.0,0.0,1.0,2.0,4.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,2027-01-30,0.0,0.0,0.0,1.0,2.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2026-11-28,0.0,1.0,2.0,3.0,4.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2026-12-12,0.0,1.0,2.0,4.0,5.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2026-12-19,1.0,2.0,4.0,5.0,7.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2026-12-26,1.0,3.0,5.0,7.0,9.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2027-01-02,1.0,2.0,4.0,6.0,8.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2027-01-09,0.0,1.0,2.0,4.0,6.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2027-01-16,0.0,0.0,1.0,2.0,4.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,2027-01-30,0.0,0.0,0.0,1.0,2.0
+210008,Mercy Medical Center Inc,BALTIMORE,2026-11-28,0.0,1.0,2.0,2.0,3.0
+210008,Mercy Medical Center Inc,BALTIMORE,2026-12-05,0.0,1.0,2.0,3.0,4.0
+210008,Mercy Medical Center Inc,BALTIMORE,2026-12-12,0.0,1.0,2.0,3.0,5.0
+210008,Mercy Medical Center Inc,BALTIMORE,2026-12-19,1.0,2.0,3.0,5.0,6.0
+210008,Mercy Medical Center Inc,BALTIMORE,2026-12-26,1.0,3.0,4.0,6.0,8.0
+210008,Mercy Medical Center Inc,BALTIMORE,2027-01-02,1.0,2.0,3.0,5.0,8.0
+210008,Mercy Medical Center Inc,BALTIMORE,2027-01-09,0.0,1.0,2.0,3.0,5.0
+210008,Mercy Medical Center Inc,BALTIMORE,2027-01-16,0.0,0.0,1.0,2.0,4.0
+210008,Mercy Medical Center Inc,BALTIMORE,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210008,Mercy Medical Center Inc,BALTIMORE,2027-01-30,0.0,0.0,0.0,1.0,2.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2026-11-28,0.0,1.0,1.0,2.0,3.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2026-12-05,0.0,1.0,1.0,2.0,3.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2026-12-12,0.0,1.0,2.0,3.0,4.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2026-12-19,1.0,2.0,3.0,4.0,6.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2026-12-26,1.0,2.0,4.0,6.0,8.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2027-01-02,1.0,2.0,3.0,5.0,7.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2027-01-09,0.0,1.0,2.0,3.0,5.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2027-01-16,0.0,0.0,1.0,2.0,3.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2027-01-23,0.0,0.0,1.0,2.0,3.0
+210063,University Of MD St Joseph Medical Center,TOWSON,2027-01-30,0.0,0.0,0.0,1.0,2.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2026-11-28,0.0,0.0,1.0,2.0,3.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2026-12-05,0.0,0.0,1.0,2.0,3.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2026-12-12,0.0,1.0,1.0,2.0,3.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2026-12-19,0.0,1.0,2.0,4.0,5.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2026-12-26,1.0,2.0,3.0,5.0,7.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2027-01-02,0.0,1.0,2.0,4.0,6.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2027-01-09,0.0,0.0,1.0,3.0,4.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2027-01-16,0.0,0.0,1.0,2.0,3.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2027-01-23,0.0,0.0,1.0,1.0,2.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,2027-01-30,0.0,0.0,0.0,1.0,2.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2026-11-28,0.0,0.0,1.0,2.0,2.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2026-12-05,0.0,0.0,1.0,2.0,3.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2026-12-12,0.0,0.0,1.0,2.0,3.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2026-12-19,0.0,1.0,2.0,3.0,5.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2026-12-26,1.0,1.0,3.0,4.0,6.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2027-01-02,0.0,1.0,2.0,3.0,5.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2027-01-09,0.0,0.0,1.0,2.0,4.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2027-01-16,0.0,0.0,1.0,2.0,3.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2027-01-23,0.0,0.0,0.0,1.0,2.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,2027-01-30,0.0,0.0,0.0,1.0,2.0
+210017,Garrett Regional Medical Center,OAKLAND,2026-11-28,0.0,0.0,1.0,2.0,2.0
+210017,Garrett Regional Medical Center,OAKLAND,2026-12-05,0.0,0.0,1.0,2.0,2.0
+210017,Garrett Regional Medical Center,OAKLAND,2026-12-12,0.0,0.0,1.0,2.0,3.0
+210017,Garrett Regional Medical Center,OAKLAND,2026-12-19,0.0,1.0,2.0,3.0,4.0
+210017,Garrett Regional Medical Center,OAKLAND,2026-12-26,0.0,1.0,2.0,4.0,6.0
+210017,Garrett Regional Medical Center,OAKLAND,2027-01-02,0.0,1.0,2.0,3.0,5.0
+210017,Garrett Regional Medical Center,OAKLAND,2027-01-09,0.0,0.0,1.0,2.0,3.0
+210017,Garrett Regional Medical Center,OAKLAND,2027-01-16,0.0,0.0,1.0,1.0,2.0
+210017,Garrett Regional Medical Center,OAKLAND,2027-01-23,0.0,0.0,0.0,1.0,2.0
+210017,Garrett Regional Medical Center,OAKLAND,2027-01-30,0.0,0.0,0.0,1.0,1.0
+210032,Union Hospital Of Cecil County,ELKTON,2026-11-28,0.0,0.0,1.0,1.0,2.0
+210032,Union Hospital Of Cecil County,ELKTON,2026-12-05,0.0,0.0,1.0,1.0,2.0
+210032,Union Hospital Of Cecil County,ELKTON,2026-12-12,0.0,0.0,1.0,2.0,2.0
+210032,Union Hospital Of Cecil County,ELKTON,2026-12-19,0.0,1.0,1.0,2.0,4.0
+210032,Union Hospital Of Cecil County,ELKTON,2026-12-26,0.0,1.0,2.0,3.0,5.0
+210032,Union Hospital Of Cecil County,ELKTON,2027-01-02,0.0,1.0,1.0,3.0,4.0
+210032,Union Hospital Of Cecil County,ELKTON,2027-01-09,0.0,0.0,1.0,2.0,3.0
+210032,Union Hospital Of Cecil County,ELKTON,2027-01-16,0.0,0.0,0.0,1.0,2.0
+210032,Union Hospital Of Cecil County,ELKTON,2027-01-23,0.0,0.0,0.0,1.0,2.0
+210032,Union Hospital Of Cecil County,ELKTON,2027-01-30,0.0,0.0,0.0,1.0,1.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2026-11-28,0.0,0.0,1.0,1.0,2.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2026-12-05,0.0,0.0,1.0,1.0,2.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2026-12-12,0.0,0.0,1.0,2.0,2.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2026-12-19,0.0,1.0,1.0,2.0,3.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2026-12-26,0.0,1.0,2.0,3.0,5.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2027-01-02,0.0,1.0,1.0,3.0,4.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2027-01-09,0.0,0.0,1.0,2.0,3.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2027-01-16,0.0,0.0,0.0,1.0,2.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2027-01-23,0.0,0.0,0.0,1.0,1.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,2027-01-30,0.0,0.0,0.0,1.0,1.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2026-11-28,0.0,0.0,1.0,1.0,2.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2026-12-05,0.0,0.0,1.0,1.0,2.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2026-12-12,0.0,0.0,1.0,2.0,2.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2026-12-19,0.0,1.0,1.0,2.0,3.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2026-12-26,0.0,1.0,2.0,3.0,4.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2027-01-02,0.0,1.0,1.0,3.0,4.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2027-01-09,0.0,0.0,1.0,2.0,3.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2027-01-16,0.0,0.0,0.0,1.0,2.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2027-01-23,0.0,0.0,0.0,1.0,1.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,2027-01-30,0.0,0.0,0.0,1.0,1.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2026-11-28,0.0,0.0,0.0,1.0,2.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2026-12-05,0.0,0.0,0.0,1.0,2.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2026-12-12,0.0,0.0,1.0,1.0,2.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2026-12-19,0.0,0.0,1.0,2.0,3.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2026-12-26,0.0,1.0,1.0,2.0,4.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2027-01-02,0.0,0.0,1.0,2.0,3.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2027-01-09,0.0,0.0,1.0,1.0,2.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2027-01-16,0.0,0.0,0.0,1.0,2.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2027-01-23,0.0,0.0,0.0,1.0,1.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,2027-01-30,0.0,0.0,0.0,0.0,1.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2026-11-28,0.0,0.0,0.0,1.0,1.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2026-12-05,0.0,0.0,0.0,1.0,1.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2026-12-12,0.0,0.0,0.0,1.0,2.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2026-12-19,0.0,0.0,1.0,1.0,2.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2026-12-26,0.0,0.0,1.0,2.0,3.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2027-01-02,0.0,0.0,1.0,2.0,2.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2027-01-09,0.0,0.0,0.0,1.0,2.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2027-01-16,0.0,0.0,0.0,1.0,1.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2027-01-23,0.0,0.0,0.0,0.0,1.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,2027-01-30,0.0,0.0,0.0,0.0,1.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2026-11-28,0.0,0.0,0.0,1.0,1.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2026-12-05,0.0,0.0,0.0,1.0,1.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2026-12-12,0.0,0.0,0.0,1.0,2.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2026-12-19,0.0,0.0,1.0,1.0,2.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2026-12-26,0.0,0.0,1.0,2.0,3.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2027-01-02,0.0,0.0,1.0,1.0,2.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2027-01-09,0.0,0.0,0.0,1.0,2.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2027-01-16,0.0,0.0,0.0,1.0,1.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2027-01-23,0.0,0.0,0.0,0.0,1.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,2027-01-30,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2026-11-28,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2026-12-05,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2026-12-12,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2026-12-19,0.0,0.0,0.0,1.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2026-12-26,0.0,0.0,0.0,1.0,2.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2027-01-02,0.0,0.0,0.0,1.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2027-01-09,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2027-01-16,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2027-01-23,0.0,0.0,0.0,0.0,1.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,2027-01-30,0.0,0.0,0.0,0.0,0.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2026-11-28,0.0,0.0,0.0,0.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2026-12-05,0.0,0.0,0.0,0.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2026-12-12,0.0,0.0,0.0,0.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2026-12-19,0.0,0.0,0.0,1.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2026-12-26,0.0,0.0,0.0,1.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2027-01-02,0.0,0.0,0.0,1.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2027-01-09,0.0,0.0,0.0,0.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2027-01-16,0.0,0.0,0.0,0.0,1.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2027-01-23,0.0,0.0,0.0,0.0,0.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,2027-01-30,0.0,0.0,0.0,0.0,0.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2026-11-28,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2026-12-05,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2026-12-12,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2026-12-19,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2026-12-26,0.0,0.0,0.0,1.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2027-01-02,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2027-01-09,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2027-01-16,0.0,0.0,0.0,0.0,1.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2027-01-23,0.0,0.0,0.0,0.0,0.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,2027-01-30,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2026-11-28,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2026-12-05,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2026-12-12,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2026-12-19,0.0,0.0,0.0,0.0,1.0
+213301,Kennedy Krieger Institute,BALTIMORE,2026-12-26,0.0,0.0,0.0,0.0,1.0
+213301,Kennedy Krieger Institute,BALTIMORE,2027-01-02,0.0,0.0,0.0,0.0,1.0
+213301,Kennedy Krieger Institute,BALTIMORE,2027-01-09,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2027-01-16,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2027-01-23,0.0,0.0,0.0,0.0,0.0
+213301,Kennedy Krieger Institute,BALTIMORE,2027-01-30,0.0,0.0,0.0,0.0,0.0

@@ -1,0 +1,47 @@
+ccn,hospital,city,share,peak_week_median,peak_median,peak_q10,peak_q90,season_rest_median
+210009,"Johns Hopkins Hospital, The",BALTIMORE,0.0631,2026-12-26,54.0,29.0,91.0,349.5
+210044,Greater Baltimore Medical Center,BALTIMORE,0.0575,2026-12-26,50.0,26.0,84.0,319.0
+210015,Medstar Franklin Square Medical Center,ROSEDALE,0.0473,2026-12-26,41.0,22.0,69.0,263.0
+210019,"Tidalhealth Peninsula Regional, Inc",SALISBURY,0.0462,2026-12-26,40.0,21.0,69.0,256.0
+210048,Johns Hopkins Howard County Medical Center,COLUMBIA,0.0457,2026-12-26,40.0,21.0,67.0,254.0
+210005,Frederick Health Hospital,FREDERICK,0.0447,2026-12-26,39.0,20.0,66.10000000000014,246.0
+210023,"Luminis Health Anne Arundel Medical Center, Inc",ANNAPOLIS,0.0429,2026-12-26,38.0,20.0,64.0,239.0
+210029,Johns Hopkins Bayview Medical Center,BALTIMORE,0.0399,2026-12-26,35.0,18.0,58.100000000000136,221.0
+210004,Holy Cross Hospital,SILVER SPRING,0.0369,2026-12-26,32.0,17.0,55.0,204.0
+210022,Suburban Hospital,BETHESDA,0.0367,2026-12-26,32.0,17.0,55.100000000000136,204.5
+210001,Meritus Medical Center,HAGERSTOWN,0.0359,2026-12-26,32.0,17.0,53.0,200.0
+210033,Carroll Hospital Center,WESTMINSTER,0.031,2026-12-26,27.0,15.0,46.100000000000136,171.0
+210011,Saint Agnes Hospital,BALTIMORE,0.03,2026-12-26,26.0,14.0,45.0,166.0
+210057,Adventist Healthcare Shady Grove Medical Center,ROCKVILLE,0.0291,2026-12-26,25.0,14.0,44.0,160.0
+210018,Medstar Montgomery Medical Center,OLNEY,0.0272,2026-12-26,24.0,13.0,41.0,151.0
+210056,Medstar Good Samaritan Hospital,BALTIMORE,0.0248,2026-12-26,22.0,12.0,38.0,137.0
+210002,University Of Maryland Medical Center,BALTIMORE,0.0242,2026-12-26,22.0,12.0,37.0,135.0
+210062,Medstar Southern Maryland Hospital Center,CLINTON,0.0227,2027-01-02,20.0,11.0,35.0,124.5
+210027,UPMC Western Maryland,CUMBERLAND,0.0222,2026-12-26,20.0,11.0,34.0,123.0
+210043,UMD Baltimore Washington  Medical Center,GLEN BURNIE,0.0204,2026-12-26,19.0,10.0,32.0,113.0
+210024,Medstar Union Memorial Hospital,BALTIMORE,0.0192,2026-12-26,17.0,9.0,30.0,106.0
+210012,Sinai Hospital Of Baltimore,BALTIMORE,0.019,2026-12-26,17.0,9.0,29.0,105.0
+210028,Medstar Saint Mary'S Hospital,LEONARDTOWN,0.0185,2026-12-26,17.0,9.0,28.0,101.0
+210034,Medstar Harbor Hospital,BALTIMORE,0.0184,2026-12-26,17.0,9.0,28.0,102.0
+210049,University Of MD Upper Chesapeake Medical Center,BEL AIR,0.0178,2026-12-26,16.0,8.0,28.0,98.0
+210051,"Luminis Health Doctors Community Medical Ctr, Inc",LANHAM,0.0172,2026-12-26,16.0,8.0,27.0,95.0
+210016,Adventist Healthcare White Oak Medical Center,SILVER SPRING,0.0161,2026-12-26,15.0,8.0,26.0,88.0
+210061,Atlantic General Hospital,BERLIN,0.0157,2026-12-26,14.0,8.0,25.0,86.0
+210040,Northwest Hospital Center,RANDALLSTOWN,0.0151,2026-12-26,14.0,8.0,24.0,83.0
+210039,Calverthealth Medical Center,PRINCE FREDERICK,0.015,2026-12-26,14.0,7.0,24.0,83.0
+210065,Holy Cross Germantown Hospital,GERMANTOWN,0.0145,2026-12-26,14.0,7.0,23.0,80.0
+210008,Mercy Medical Center Inc,BALTIMORE,0.0133,2026-12-26,13.0,7.0,21.0,73.0
+210063,University Of MD St Joseph Medical Center,TOWSON,0.012,2026-12-26,12.0,6.0,20.0,67.0
+210003,University Of MD Capital Region Medical Center,UPPER MARLBORO,0.0096,2026-12-26,9.0,5.0,16.0,52.0
+210035,University Of MD Charles Regional  Medical Center,LA PLATA,0.0087,2026-12-26,9.0,5.0,15.0,47.0
+210017,Garrett Regional Medical Center,OAKLAND,0.0078,2026-12-26,8.0,4.0,14.0,42.0
+210032,Union Hospital Of Cecil County,ELKTON,0.0063,2026-12-26,7.0,4.0,11.0,34.0
+210060,Adventist Healthcare Fort Washington Medical Ctr,FORT WASHINGTON,0.006,2026-12-26,6.0,3.0,11.0,33.0
+210037,University Of MD Shore Medical Center At Easton,EASTON,0.006,2026-12-26,6.0,3.0,11.0,33.0
+210038,University Of MD Medical Center Midtown Campus,BALTIMORE,0.0045,2026-12-26,5.0,3.0,9.0,24.0
+210058,UMD Rehabilitation &  Orthopaedic Institute,BALTIMORE,0.0034,2026-12-26,4.0,2.0,7.0,18.0
+213300,Mount Washington Pediatric Hospital,BALTIMORE,0.0032,2026-12-26,4.0,2.0,7.0,17.0
+210064,Levindale Hebrew Geriatric Center And Hospital,BALTIMORE,0.0016,2026-12-26,2.0,1.0,4.0,9.0
+210006,University Of MD Harford Memorial Hospital,HAVRE DE GRACE,0.0012,2026-12-26,2.0,1.0,3.0,6.0
+210030,UMD Shore Medical Ctr At Chestertown,CHESTERTOWN,0.001,2026-12-26,2.0,1.0,3.0,5.0
+213301,Kennedy Krieger Institute,BALTIMORE,0.0005,2026-12-26,1.0,1.0,2.0,3.0
